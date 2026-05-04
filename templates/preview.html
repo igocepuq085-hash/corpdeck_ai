@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Предпросмотр - {{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+    <main class="page">
+        <section class="card wide-card">
+            <h1>Файл загружен</h1>
+            <p class="lead">Текст извлечен, а локальная эвристика собрала черновой план будущей презентации.</p>
+
+            <div class="summary">
+                <p><strong>Имя файла:</strong> {{ filename }}</p>
+                <p><strong>Тема презентации:</strong> {{ topic }}</p>
+                <p><strong>Тип презентации:</strong> {{ deck_type }}</p>
+                <p><strong>Тип файла:</strong> {{ extraction.file_type }}</p>
+                <p><strong>Статус извлечения:</strong> {{ extraction.status }}</p>
+                <p><strong>Количество символов:</strong> {{ extraction.characters }}</p>
+                {% if extraction.error %}
+                    <p><strong>Ошибка:</strong> {{ extraction.error }}</p>
+                {% endif %}
+            </div>
+
+            <h2>Предпросмотр текста</h2>
+            <div class="text-preview">
+                {% if extraction.text %}
+                    <pre>{{ extraction.text[:5000] }}</pre>
+                {% else %}
+                    <p>Текст не найден.</p>
+                {% endif %}
+            </div>
+
+            {% if extraction.characters > 5000 %}
+                <p class="note">Показаны первые 5000 символов.</p>
+            {% endif %}
+
+            <h2>Черновой план презентации</h2>
+
+            <div class="plan-source-badge">
+                <strong>Источник плана:</strong> {{ plan_source }}
+            </div>
+
+            {% if ai_error %}
+                <div class="warning-box">
+                    AI-план не создан, использован локальный режим. Причина: {{ ai_error }}
+                </div>
+            {% endif %}
+
+            <div class="summary">
+                <h3>AI-изображения</h3>
+                <p><strong>Создано изображений:</strong> {{ generated_images_count }}</p>
+                {% if generated_images %}
+                    {% for image in generated_images %}
+                        <p>
+                            <strong>Слайд {{ image.slide_number }}:</strong>
+                            category: {{ image.category or "n/a" }} —
+                            scene: {{ image.scene or "n/a" }} —
+                            mode: {{ image.image_mode or "n/a" }} —
+                            status: {{ image.status }}
+                            {% if image.image_path %} · {{ image.image_path }}{% endif %}
+                            {% if image.error %} · {{ image.error }}{% endif %}
+                        </p>
+                    {% endfor %}
+                {% else %}
+                    <p>Изображения не создавались.</p>
+                {% endif %}
+            </div>
+
+            <div class="plan-grid">
+                <div class="summary">
+                    <h3>Контекст</h3>
+                    {% for key, value in deck_plan.detected_context.items() %}
+                        <p><strong>{{ key }}:</strong> {{ value }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="summary">
+                    <h3>Стиль</h3>
+                    <p><strong>style_name:</strong> {{ deck_plan.theme_style.style_name }}</p>
+                    <p><strong>visual_tone:</strong> {{ deck_plan.theme_style.visual_tone }}</p>
+                    <p><strong>image_style:</strong> {{ deck_plan.theme_style.image_style }}</p>
+                    <p><strong>chart_style:</strong> {{ deck_plan.theme_style.chart_style }}</p>
+                    <p><strong>table_style:</strong> {{ deck_plan.theme_style.table_style }}</p>
+                </div>
+            </div>
+
+            <div class="summary">
+                <h3>Правила генерации</h3>
+                {% for key, value in deck_plan.generation_rules.items() %}
+                    <p><strong>{{ key }}:</strong> {{ value }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="slides-list">
+                {% for slide in deck_plan.slides %}
+                    <article class="slide-item">
+                        <div class="slide-head">
+                            <strong>{{ slide.number }}. {{ slide.title }}</strong>
+                            <span>{{ slide.type }} · {{ slide.layout }}</span>
+                        </div>
+
+                        <p class="slide-flags">
+                            Изображение: {{ "да" if slide.needs_image else "нет" }} ·
+                            Таблица: {{ "да" if slide.needs_table else "нет" }} ·
+                            График: {{ "да" if slide.needs_chart else "нет" }}
+                        </p>
+
+                        {% if slide.content.bullets %}
+                            <ul>
+                                {% for bullet in slide.content.bullets[:3] %}
+                                    <li>{{ bullet }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>{{ slide.subtitle }}</p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+
+            <h2>Черновой JSON</h2>
+            <div class="json-preview">
+                <pre>{{ deck_plan_json }}</pre>
+            </div>
+
+            <div class="actions-row">
+                <a class="button-link" href="/deck/{{ project_id }}">Открыть HTML-презентацию</a>
+                <a class="button-link secondary-button" href="/">Загрузить другой файл</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

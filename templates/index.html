@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+    <main class="page">
+        <section class="card">
+            <h1>AI Brand Deck Studio</h1>
+            <p class="lead">Сервис генерации и улучшения корпоративных презентаций</p>
+
+            <form class="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+                <label>
+                    Файл презентации или документа
+                    <input type="file" name="file" required>
+                </label>
+
+                <label>
+                    Тема презентации
+                    <input type="text" name="topic" placeholder="Например: стратегия продаж на 2026 год" required>
+                </label>
+
+                <label>
+                    Тип презентации
+                    <select name="deck_type" required>
+                        <option value="Корпоративная презентация">Корпоративная презентация</option>
+                        <option value="Pitch deck">Pitch deck</option>
+                        <option value="Отчет">Отчет</option>
+                        <option value="Коммерческое предложение">Коммерческое предложение</option>
+                    </select>
+                </label>
+
+                <button type="submit">Создать презентацию</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
+

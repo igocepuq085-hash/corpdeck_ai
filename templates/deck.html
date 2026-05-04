@@ -1,0 +1,264 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ deck_plan.topic }} - {{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body class="deck-body theme-light">
+    <nav class="deck-topbar">
+        <div>
+            <strong>{{ brand_config.brand_name }}</strong>
+            <span>project_id: {{ project_id }}</span>
+        </div>
+        <div class="deck-actions">
+            <a class="button-link secondary-button" href="/">РќР°Р·Р°Рґ</a>
+            <button type="button" onclick="window.print()">РџРµС‡Р°С‚СЊ / PDF С‡РµСЂРµР· Р±СЂР°СѓР·РµСЂ</button>
+        </div>
+    </nav>
+
+    {% set total_slides = deck_plan.slide_count or deck_plan.slides|length %}
+
+    <main class="deck-wrapper coordinate-deck" data-brand="{{ brand_config.brand_name }}">
+        {% for slide in deck_plan.slides %}
+            {% set layout_key = "default" %}
+            {% if slide.type == "cover" or slide.layout == "hero" %}
+                {% set layout_key = "cover" %}
+            {% elif slide.type == "section" %}
+                {% set layout_key = "section" %}
+            {% elif slide.layout in ["cards", "impact", "summary"] %}
+                {% set layout_key = "cards" %}
+            {% elif slide.layout == "data" %}
+                {% set layout_key = "analytics" %}
+            {% elif slide.layout == "timeline" %}
+                {% set layout_key = "timeline" %}
+            {% elif slide.layout == "risk_matrix" %}
+                {% set layout_key = "risks" %}
+            {% elif slide.type == "final" or slide.layout == "final" %}
+                {% set layout_key = "final" %}
+            {% elif slide.layout in ["text", "statement", "bullets", "two_columns", "process"] %}
+                {% set layout_key = "text" %}
+            {% endif %}
+
+            {% set footer_topic = slide.footer or deck_plan.topic or "РљРѕСЂРїРѕСЂР°С‚РёРІРЅР°СЏ РїСЂРµР·РµРЅС‚Р°С†РёСЏ" %}
+            {% set bullets = slide.content.bullets or [] %}
+
+            <div class="slide-viewport">
+                <section class="slide">
+                    <div class="slide-bg"></div>
+
+                    {% if slide.has_generated_image and slide.number != 1 and slide.number != total_slides %}
+                        {% set image_mode = slide.generated_image_mode or "full-soft" %}
+                        <div class="slide-image-bg is-{{ image_mode }}">
+                            <img src="{{ slide.generated_image_path }}" alt="" class="slide-bg-image">
+                            <div class="slide-image-overlay"></div>
+                        </div>
+                    {% endif %}
+
+                    {% if layout_key == "cover" %}
+                        <div class="brand-zone">
+                            <img src="/static/brand/logo.png" alt="Р›РѕРіРѕС‚РёРї" class="brand-logo">
+                        </div>
+                    {% else %}
+                        <div class="slide-header-row">
+                            <div class="header-logo">
+                                <img src="/static/brand/logo.png" alt="Р›РѕРіРѕС‚РёРї" class="brand-logo">
+                            </div>
+
+                            <div class="header-title-wrap">
+                                <h1 class="corporate-slide-title">{{ slide.title }}</h1>
+                            </div>
+
+                            <div class="header-slide-number">{{ slide.number }}</div>
+                        </div>
+                    {% endif %}
+
+                    <main class="content-zone">
+                        {% if layout_key == "cover" %}
+                            <div class="cover-layout">
+                                <div class="cover-text">
+                                    <p class="cover-kicker line-clamp-1">{{ deck_plan.presentation_type }}</p>
+                                    <h1 class="cover-title line-clamp-3">{{ deck_plan.topic or slide.title }}</h1>
+                                    <p class="cover-subtitle line-clamp-2">{{ slide.subtitle or slide.title }}</p>
+                                    <p class="brand-slogan line-clamp-1">{{ brand_config.slogan }}</p>
+                                </div>
+                                <div class="cover-visual">
+                                    {% if slide.needs_image %}
+                                        <div class="ai-image-placeholder">
+                                            <span>Изображение будет создано по теме презентации</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        {% elif layout_key == "section" %}
+                            <div class="section-layout">
+                                <div class="layout-content">
+                                    <h2 class="section-title line-clamp-3">{{ slide.title }}</h2>
+                                    <p class="section-subtitle line-clamp-3">{{ slide.subtitle or slide.content.speaker_note }}</p>
+                                </div>
+                            </div>
+
+                        {% elif layout_key == "cards" %}
+                            <div class="cards-layout">
+                                <div class="layout-content">
+                                    <div class="cards-grid">
+                                        {% for bullet in bullets[:5] %}
+                                            <div class="metric-card">
+                                                <div class="icon-line icon-route"></div>
+                                                <span>0{{ loop.index }}</span>
+                                                <p class="line-clamp-5">{{ bullet }}</p>
+                                            </div>
+                                        {% endfor %}
+                                        {% if bullets|length > 5 %}
+                                            <div class="metric-card overflow-card">
+                                                <span>+</span>
+                                                <p>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% elif layout_key == "analytics" %}
+                            <div class="analytics-layout">
+                                <div class="layout-content">
+                                    <div class="kpi-row">
+                                        <div class="metric-card"><div class="icon-line icon-document"></div><span>01</span><p>РџР»Р°РЅ</p></div>
+                                        <div class="metric-card"><div class="icon-line icon-chart"></div><span>02</span><p>Р¤Р°РєС‚</p></div>
+                                        <div class="metric-card"><div class="icon-line icon-shield"></div><span>03</span><p>Р­С„С„РµРєС‚</p></div>
+                                    </div>
+
+                                    {% if slide.needs_chart %}
+                                        <div class="chart-placeholder">
+                                            <div style="height: 42%"></div>
+                                            <div style="height: 68%"></div>
+                                            <div style="height: 54%"></div>
+                                            <div style="height: 82%"></div>
+                                            <div style="height: 63%"></div>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if slide.needs_table %}
+                                        <table class="table-placeholder">
+                                            <thead>
+                                                <tr>
+                                                    <th>РџРѕРєР°Р·Р°С‚РµР»СЊ</th>
+                                                    <th>Р—РЅР°С‡РµРЅРёРµ</th>
+                                                    <th>РљРѕРјРјРµРЅС‚Р°СЂРёР№</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td>РџР»Р°РЅ</td><td>--</td><td>РЈС‚РѕС‡РЅРёС‚СЊ</td></tr>
+                                                <tr><td>Р¤Р°РєС‚</td><td>--</td><td>РџСЂРѕРІРµСЂРёС‚СЊ</td></tr>
+                                                <tr><td>РЎСЂРѕРє</td><td>--</td><td>Р—Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ</td></tr>
+                                                <tr><td>Р­С„С„РµРєС‚</td><td>--</td><td>РћС†РµРЅРёС‚СЊ</td></tr>
+                                            </tbody>
+                                        </table>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        {% elif layout_key == "timeline" %}
+                            <div class="timeline-layout">
+                                <div class="layout-content">
+                                    <div class="timeline">
+                                        {% for bullet in bullets[:5] %}
+                                            <div class="timeline-step">
+                                                <span>{{ loop.index }}</span>
+                                                <p class="line-clamp-4">{{ bullet }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="timeline-note line-clamp-3">
+                                        {% if bullets|length > 5 %}
+                                            Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ
+                                        {% else %}
+                                            {{ slide.subtitle or slide.content.speaker_note }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                        {% elif layout_key == "risks" %}
+                            <div class="risks-layout">
+                                <div class="layout-content">
+                                    <div class="risk-grid">
+                                        {% for bullet in bullets[:5] %}
+                                            <div>
+                                                <strong>Р РёСЃРє {{ loop.index }}</strong>
+                                                <p class="line-clamp-5">{{ bullet }}</p>
+                                            </div>
+                                        {% endfor %}
+                                        {% if bullets|length > 5 %}
+                                            <div>
+                                                <strong>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ</strong>
+                                                <p>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% elif layout_key == "final" %}
+                            <div class="final-layout">
+                                <div class="layout-content">
+                                    <div class="final-statement">
+                                        <p class="line-clamp-4">{{ slide.subtitle or "РЎР»РµРґСѓСЋС‰РёР№ С€Р°Рі СЃРѕРіР»Р°СЃРѕРІР°РЅ" }}</p>
+                                    </div>
+                                    <ul class="final-bullets">
+                                        {% for bullet in bullets[:5] %}
+                                            <li class="line-clamp-2">{{ bullet }}</li>
+                                        {% endfor %}
+                                        {% if bullets|length > 5 %}
+                                            <li>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</li>
+                                        {% endif %}
+                                    </ul>
+                                    <div class="final-visual">
+                                        {% if slide.needs_image %}
+                                            <div class="ai-image-placeholder">
+                                                <span>Изображение будет создано по теме презентации</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% else %}
+                            <div class="text-layout">
+                                <div class="layout-content">
+                                    <p class="text-subtitle line-clamp-2">{{ slide.subtitle }}</p>
+                                    <div class="text-card">
+                                        <ul class="slide-bullets">
+                                            {% for bullet in bullets[:5] %}
+                                                <li class="line-clamp-3">{{ bullet }}</li>
+                                            {% endfor %}
+                                            {% if bullets|length > 5 %}
+                                                <li>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <div class="text-side-accent">
+                                        {% if slide.needs_image %}
+                                            <div class="ai-image-placeholder">
+                                                <span>Изображение будет создано по теме презентации</span>
+                                            </div>
+                                        {% else %}
+                                            <p class="line-clamp-5">{{ slide.content.speaker_note }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </main>
+
+                    <div class="footer-line"></div>
+                    <footer class="footer-topic">{{ footer_topic }}</footer>
+                    <div class="footer-page">{{ slide.number }} / {{ total_slides }}</div>
+                </section>
+            </div>
+        {% endfor %}
+    </main>
+</body>
+</html>
