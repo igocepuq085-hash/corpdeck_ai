@@ -6,80 +6,34 @@ from openai import OpenAI
 from app.config import BASE_DIR, OPENAI_API_KEY, OPENAI_IMAGE_MODEL
 
 
-CATEGORY_KEYWORDS = {
-    "infrastructure": [
-        "инфраструктура",
-        "маршрут",
-        "сеть",
-        "логистика",
-        "перевозк",
-        "магистраль",
-        "филиал",
-        "регион",
-    ],
-    "rolling_stock": ["локомотив", "вагон", "цистерн", "подвижн", "состав", "поезд"],
-    "safety": ["безопасность", "охрана труда", "риск", "опасность", "сиз", "высот", "контроль", "проверка"],
-    "digital_control": [
-        "цифров",
-        "vr",
-        "виртуальн",
-        "тренажер",
-        "тренажёр",
-        "технология",
-        "мониторинг",
-        "система",
-        "управление",
-        "диспетчер",
-        "аналитика в реальном времени",
-    ],
-    "analytics": ["показатель", "данные", "аналитика", "результат", "динамика", "эффективность", "kpi", "график", "таблица"],
-    "training": ["обучение", "подготовка", "развитие", "тестирование", "сценарий", "тренировка", "экзамен"],
-    "project_management": ["этап", "план", "дорожная карта", "срок", "реализация", "проект", "внедрение"],
-    "team": ["команда", "участники", "руководитель", "куратор", "заказчик", "администратор"],
-    "industrial_environment": ["производство", "объект", "промышленн", "станция", "эстакада", "цех", "площадка"],
-    "document_process": ["документ", "регламент", "инструкция", "методика", "локальный акт", "согласование"],
-}
-
-CATEGORY_PRIORITY = [
-    "safety",
-    "digital_control",
-    "rolling_stock",
-    "infrastructure",
-    "analytics",
-    "training",
-    "project_management",
-    "industrial_environment",
-    "team",
-    "document_process",
-    "general_corporate",
-]
-
 CATEGORY_SCENES = {
-    "infrastructure": "железнодорожная инфраструктура, маршруты и логистика",
-    "rolling_stock": "локомотивы, вагоны и подвижной состав",
-    "safety": "промышленная безопасность, контроль и защита",
-    "digital_control": "цифровое управление, VR и диспетчеризация",
-    "analytics": "данные, аналитика и мониторинг показателей",
-    "training": "обучение персонала и тренировка навыков",
-    "project_management": "управление проектом, этапы и внедрение",
-    "team": "корпоративная команда и координация специалистов",
-    "industrial_environment": "промышленная площадка и железнодорожный объект",
-    "document_process": "регламенты, документы и цифровой документооборот",
-    "general_corporate": "универсальный корпоративный технологичный акцент",
+    "infrastructure": "маршрут, рельсовый узел и логистическая схема",
+    "rolling_stock": "лаконичный поезд, вагон или цистерна без логотипов",
+    "safety": "щит, каска, чек-лист и контроль безопасности",
+    "digital_control": "цифровой интерфейс, мониторинг, сеть и управление",
+    "analytics": "график, KPI, панель данных и аналитика",
+    "training": "учебный модуль, сценарий и контроль знаний",
+    "project_management": "этапы, дорожная карта, координация и внедрение",
+    "team": "команда, компетенции и взаимодействие",
+    "industrial_environment": "промышленный объект, площадка или инженерная схема",
+    "document_process": "документ, регламент, согласование и цифровой документооборот",
+    "general_corporate": "универсальный корпоративный технологичный символ",
 }
 
-CATEGORY_HINTS = {
-    "infrastructure": "маршрут, рельсовый узел, логистический коридор, карта перевозок",
-    "rolling_stock": "лаконичный локомотив, вагон, цистерна или состав без логотипов",
-    "safety": "щит безопасности, каска, контрольная отметка, защитный контур",
-    "digital_control": "VR-шлем, дисплей мониторинга, цифровой пульт, интерфейс управления",
-    "analytics": "диаграмма, панель данных, график, KPI-индикатор",
-    "training": "обучающий модуль, сценарий тренировки, наставник и цифровой тренажер",
-    "project_management": "этапы проекта, дорожная карта, координация, внедрение",
-    "team": "деловое взаимодействие специалистов, согласованная работа",
-    "industrial_environment": "промышленный объект, станция, инфраструктурный узел",
-    "document_process": "документ, регламент, планшет, согласование",
-    "general_corporate": "синий технологичный корпоративный символ",
+DOMAIN_CATEGORIES = {
+    "finance": ["analytics", "document_process", "project_management"],
+    "transport": ["infrastructure", "rolling_stock", "analytics"],
+    "production": ["industrial_environment", "analytics", "safety"],
+    "safety": ["safety", "document_process", "industrial_environment"],
+    "education": ["training", "digital_control", "document_process"],
+    "it_digital": ["digital_control", "analytics", "infrastructure"],
+    "construction": ["industrial_environment", "project_management", "document_process"],
+    "hr": ["team", "training", "project_management"],
+    "marketing": ["analytics", "team", "document_process"],
+    "sales": ["analytics", "project_management", "team"],
+    "legal_compliance": ["document_process", "safety", "analytics"],
+    "project_management": ["project_management", "analytics", "document_process"],
+    "general": ["general_corporate", "analytics", "project_management"],
 }
 
 ASSET_TYPE_FILE_PARTS = {
@@ -94,74 +48,46 @@ def detect_slide_visual_category(slide: dict, deck_plan: dict) -> dict:
     return {
         "category": strategy["category"],
         "scene": strategy["scene"],
-        "keywords": strategy["keywords"],
-        "image_mode": "side-accent",
+        "keywords": [],
+        "image_mode": "png-assets",
     }
 
 
 def detect_slide_asset_strategy(slide: dict, deck_plan: dict) -> dict:
-    content = slide.get("content") or {}
     context = deck_plan.get("detected_context") or {}
-    text_parts = [
-        slide.get("title", ""),
-        slide.get("subtitle", ""),
-        content.get("speaker_note", ""),
-        " ".join(str(item) for item in content.get("bullets") or []),
-        context.get("main_theme", ""),
-        context.get("domain", ""),
-    ]
-    matches = _find_category_matches(" ".join(text_parts).lower())
+    domain = context.get("domain") or "general"
+    requested = slide.get("png_asset_strategy") if isinstance(slide.get("png_asset_strategy"), dict) else {}
+    allowed = DOMAIN_CATEGORIES.get(domain, DOMAIN_CATEGORIES["general"])
+    requested_category = requested.get("category")
+    category = requested_category if requested_category in allowed else allowed[0]
 
-    category = "general_corporate"
-    for candidate in CATEGORY_PRIORITY:
-        if candidate in matches:
-            category = candidate
-            break
+    slide_text = " ".join(
+        [
+            str(slide.get("title") or ""),
+            str(slide.get("subtitle") or ""),
+            " ".join(str(item) for item in ((slide.get("content") or {}).get("bullets") or [])),
+        ]
+    ).lower()
+    if "vr" in slide_text or "тренаж" in slide_text:
+        category = "digital_control" if domain in {"it_digital", "education", "transport", "general"} else category
+    if "безопас" in slide_text or "риск" in slide_text:
+        category = "safety" if "safety" in allowed else category
+    if "данн" in slide_text or "kpi" in slide_text or "показател" in slide_text:
+        category = "analytics" if "analytics" in allowed else category
 
-    layout = slide.get("layout") or ""
-    slide_type = slide.get("type") or ""
-    layout_key = _normalize_layout(slide)
-    asset_type = "thematic_accent"
-    count = 1
-    placement = "side-note"
-
-    if layout_key == "cards":
-        asset_type = "icon"
-        count = 3
-        placement = "card-header"
-    elif layout_key == "analytics":
-        asset_type = "icon"
-        count = 3
-        placement = "kpi-row"
-    elif layout_key == "timeline":
-        asset_type = "icon"
-        count = 5
-        placement = "timeline-node"
-    elif layout_key == "risks":
-        asset_type = "icon"
-        count = 3
-        placement = "card-header"
-    elif layout_key == "text":
-        asset_type = "mini_illustration" if category in {"training", "digital_control", "industrial_environment"} else "thematic_accent"
-        count = 1
-        placement = "top-right-small" if not slide.get("needs_table") else "side-note"
-    elif slide_type == "section":
-        asset_type = "thematic_accent"
-        count = 1
-        placement = "section-accent"
-
-    if layout in {"data"} and slide.get("needs_chart"):
-        placement = "chart-corner"
-    if layout in {"data"} and slide.get("needs_table") and not slide.get("needs_chart"):
-        placement = "table-corner"
+    composition = (slide.get("ui_design") or {}).get("composition") or slide.get("layout") or "text"
+    asset_type = requested.get("type") if requested.get("type") in {"icon", "mini_illustration", "thematic_accent"} else _asset_type_for_composition(composition)
+    count = _safe_int(requested.get("count"), _asset_count_for_composition(composition))
+    placement = requested.get("placement") or _placement_for_composition(composition)
 
     return {
         "category": category,
-        "scene": CATEGORY_SCENES[category],
-        "keywords": matches.get(category, []),
+        "scene": CATEGORY_SCENES.get(category, CATEGORY_SCENES["general_corporate"]),
+        "keywords": [],
         "recommended_asset_type": asset_type,
-        "recommended_count": count,
+        "recommended_count": max(0, min(count, 5)),
         "placement": placement,
+        "domain": domain,
     }
 
 
@@ -171,23 +97,27 @@ def select_slides_for_png_assets(deck_plan: dict, max_assets: int = 8) -> list[d
         return []
 
     last_number = slides[-1].get("number")
-    priorities = ["text", "cards", "analytics", "timeline", "risks"]
+    preferred = ["kpi_wall", "data_focus", "timeline", "risks", "split_story", "comparison", "economics"]
     selected = []
     planned_assets = 0
 
-    for wanted_layout in priorities:
+    for composition in preferred:
         for slide in slides:
             if slide.get("number") in {1, last_number}:
                 continue
             if slide in selected:
                 continue
-            if _normalize_layout(slide) != wanted_layout:
+            slide_composition = (slide.get("ui_design") or {}).get("composition") or slide.get("layout")
+            if slide_composition != composition:
                 continue
-
+            if not slide.get("png_assets_required") and composition not in {"kpi_wall", "timeline", "risks"}:
+                continue
             strategy = detect_slide_asset_strategy(slide, deck_plan)
-            planned = max(1, min(strategy["recommended_count"], max_assets - planned_assets))
-            selected.append({**slide, "_asset_strategy": {**strategy, "recommended_count": planned}})
-            planned_assets += planned
+            count = max(1, min(strategy["recommended_count"], max_assets - planned_assets))
+            if count <= 0:
+                return selected
+            selected.append({**slide, "_asset_strategy": {**strategy, "recommended_count": count}})
+            planned_assets += count
             if planned_assets >= max_assets:
                 return selected
 
@@ -216,9 +146,8 @@ def generate_slide_png_assets(
         for asset_index in range(1, asset_count + 1):
             if len(results) >= max_assets:
                 return results
-
-            asset_type = strategy.get("recommended_asset_type", "thematic_accent")
-            file_part = ASSET_TYPE_FILE_PARTS.get(asset_type, "accent")
+            asset_type = strategy.get("recommended_asset_type", "icon")
+            file_part = ASSET_TYPE_FILE_PARTS.get(asset_type, "icon")
             slide_number = int(slide.get("number") or 0)
             file_name = f"slide_{slide_number:02d}_{file_part}_{asset_index:02d}.png"
             local_path = output_dir / file_name
@@ -236,7 +165,6 @@ def generate_slide_png_assets(
                 b64_json = getattr(image_data, "b64_json", None)
                 if not b64_json:
                     raise RuntimeError("OpenAI Image API не вернул PNG в base64")
-
                 local_path.write_bytes(base64.b64decode(b64_json))
                 results.append(
                     {
@@ -270,52 +198,32 @@ def generate_slide_png_assets(
     return results
 
 
-def build_png_asset_prompt(
-    slide: dict,
-    deck_plan: dict,
-    brand_config: dict,
-    asset_strategy: dict,
-) -> str:
+def build_png_asset_prompt(slide: dict, deck_plan: dict, brand_config: dict, asset_strategy: dict) -> str:
     title = slide.get("title") or deck_plan.get("topic") or "корпоративная презентация"
-    subtitle = slide.get("subtitle") or ""
-    content = slide.get("content") or {}
-    bullets = content.get("bullets") or []
-    colors = brand_config.get("colors", {})
-    asset_type = asset_strategy.get("recommended_asset_type", "thematic_accent")
-    category = asset_strategy.get("category", "general_corporate")
-    scene = asset_strategy.get("scene", CATEGORY_SCENES["general_corporate"])
+    domain = asset_strategy.get("domain") or (deck_plan.get("detected_context") or {}).get("domain") or "general"
+    category = asset_strategy.get("category") or "general_corporate"
+    asset_type = asset_strategy.get("recommended_asset_type") or "icon"
+    scene = asset_strategy.get("scene") or CATEGORY_SCENES.get(category, CATEGORY_SCENES["general_corporate"])
+    colors = brand_config.get("colors") or {}
 
-    type_instruction = {
-        "icon": (
-            "Тип объекта: чистая PNG-иконка или пиктограмма. Простой силуэт, корпоративный линейный стиль, "
-            "квадратная композиция, прозрачный или чистый светлый фон, без лишних деталей."
-        ),
-        "mini_illustration": (
-            "Тип объекта: небольшая тематическая мини-иллюстрация. Компактная композиция, прозрачный или очень "
-            "чистый светлый фон, подходит для вставки в угол слайда."
-        ),
-        "thematic_accent": (
-            "Тип объекта: небольшой тематический PNG-акцент. Это может быть лаконичный объект по теме: маршрут, "
-            "щит безопасности, цифровой интерфейс, схема, мониторинг или железнодорожный элемент."
-        ),
-    }.get(asset_type, "Тип объекта: небольшой тематический PNG-акцент.")
+    type_text = {
+        "icon": "чистая линейная пиктограмма, один объект, квадратная композиция",
+        "mini_illustration": "мини-иллюстрация, компактная композиция, один главный объект",
+        "thematic_accent": "небольшой тематический акцент, один объект или простая схема",
+    }.get(asset_type, "маленький PNG-элемент")
 
+    restrictions = _domain_restrictions(domain)
     return (
-        "Создай небольшой PNG-элемент для корпоративной презентации. "
-        f"Тема слайда: {title}. "
-        f"Подзаголовок: {subtitle}. "
-        f"Смысловые тезисы: {'; '.join(str(item) for item in bullets[:3])}. "
-        f"Категория: {category}. Сцена: {scene}. "
-        f"Визуальная логика: {CATEGORY_HINTS.get(category, CATEGORY_HINTS['general_corporate'])}. "
-        f"{type_instruction} "
-        "Строго без текста внутри изображения, без чужих логотипов, без товарных знаков, без водяных знаков. "
-        "Не делать полноэкранный фон и не делать широкую фотографию. Нужен маленький визуальный элемент, "
-        "пригодный для точечной вставки в слайд. "
-        "Стиль: премиальный корпоративный, индустриальный, технологичный, минималистичный. "
-        "Палитра: белый, голубой, синий, стальной серый; "
-        f"акценты {colors.get('foundation', '#0077C8')}, {colors.get('corporate', '#003D73')}, "
-        f"{colors.get('technical', '#66B5E8')}. "
-        "Фон прозрачный или очень чистый светлый, композиция компактная, без перегруза мелкими деталями."
+        "Создай маленький PNG-элемент для корпоративного слайда. "
+        f"Тема слайда: {title}. Домен: {domain}. Категория: {category}. Сюжет: {scene}. "
+        f"Тип: {type_text}. "
+        "Строго без текста внутри изображения, без логотипов, без товарных знаков, без водяных знаков. "
+        "Не делать фотографию на весь слайд, фон, пейзаж или сложную сцену. "
+        "Нужен один релевантный объект для точечной вставки в UI-композицию слайда. "
+        "Предпочтительно прозрачный фон или очень чистый светлый фон. "
+        "Стиль: премиальный корпоративный линейный стиль, минимализм, бело-голубая палитра, синие и стальные акценты. "
+        f"Использовать цвета {colors.get('foundation', '#0077C8')}, {colors.get('corporate', '#003D73')}, {colors.get('technical', '#66B5E8')}. "
+        f"{restrictions}"
     )
 
 
@@ -324,12 +232,7 @@ def build_image_prompt(slide: dict, deck_plan: dict, brand_config: dict) -> str:
     return build_png_asset_prompt(slide, deck_plan, brand_config, strategy)
 
 
-def generate_slide_images(
-    project_id: str,
-    deck_plan: dict,
-    brand_config: dict,
-    max_images: int = 5,
-) -> list[dict]:
+def generate_slide_images(project_id: str, deck_plan: dict, brand_config: dict, max_images: int = 5) -> list[dict]:
     return generate_slide_png_assets(project_id, deck_plan, brand_config, max_assets=max_images)
 
 
@@ -338,38 +241,42 @@ def select_slides_for_images(deck_plan: dict, max_images: int = 5) -> list[dict]
 
 
 def get_image_mode_for_slide(slide: dict) -> str:
-    if slide.get("has_png_assets"):
-        return "png-assets"
-    return "none"
+    return "png-assets" if slide.get("has_png_assets") else "none"
 
 
-def _find_category_matches(text: str) -> dict:
-    matches = {}
-    for category, keywords in CATEGORY_KEYWORDS.items():
-        found = [keyword for keyword in keywords if keyword.lower() in text]
-        if found:
-            matches[category] = found
-    return matches
+def _asset_type_for_composition(composition: str) -> str:
+    if composition in {"kpi_wall", "data_focus", "timeline", "risks"}:
+        return "icon"
+    if composition in {"split_story", "comparison", "economics"}:
+        return "thematic_accent"
+    return "mini_illustration"
 
 
-def _normalize_layout(slide: dict) -> str:
-    slide_type = slide.get("type") or ""
-    layout = slide.get("layout") or ""
+def _asset_count_for_composition(composition: str) -> int:
+    return {"timeline": 4, "kpi_wall": 3, "data_focus": 3, "risks": 3}.get(composition, 1)
 
-    if slide_type == "cover" or layout == "hero":
-        return "cover"
-    if slide_type == "final" or layout == "final":
-        return "final"
-    if slide_type == "section":
-        return "section"
-    if layout in {"cards", "impact", "summary"}:
-        return "cards"
-    if layout == "data" or slide_type == "analytics":
-        return "analytics"
-    if layout == "timeline" or slide_type == "timeline":
-        return "timeline"
-    if layout == "risk_matrix" or slide_type == "risks":
-        return "risks"
-    if layout in {"text", "statement", "bullets", "two_columns", "process"}:
-        return "text"
-    return "text"
+
+def _placement_for_composition(composition: str) -> str:
+    return {
+        "timeline": "timeline-node",
+        "kpi_wall": "kpi-row",
+        "data_focus": "chart-corner",
+        "risks": "card-header",
+        "comparison": "side-note",
+        "economics": "chart-corner",
+    }.get(composition, "side-note")
+
+
+def _domain_restrictions(domain: str) -> str:
+    if domain not in {"it_digital", "education", "transport", "general"}:
+        return "Не использовать VR, если это явно не указано в теме. "
+    if domain not in {"hr", "education", "team"}:
+        return "Не изображать людей, если это не требуется смыслом. "
+    return ""
+
+
+def _safe_int(value, fallback: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return fallback

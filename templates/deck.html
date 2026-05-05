@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -26,46 +26,28 @@
 
     <main class="deck-wrapper coordinate-deck" data-brand="{{ brand_config.brand_name }}">
         {% for slide in deck_plan.slides %}
-            {% set layout_key = "default" %}
-            {% if slide.type == "cover" or slide.layout == "hero" %}
-                {% set layout_key = "cover" %}
-            {% elif slide.type == "section" %}
-                {% set layout_key = "section" %}
-            {% elif slide.layout in ["cards", "impact", "summary"] %}
-                {% set layout_key = "cards" %}
-            {% elif slide.layout == "data" %}
-                {% set layout_key = "analytics" %}
-            {% elif slide.layout == "timeline" %}
-                {% set layout_key = "timeline" %}
-            {% elif slide.layout == "risk_matrix" %}
-                {% set layout_key = "risks" %}
-            {% elif slide.type == "final" or slide.layout == "final" %}
-                {% set layout_key = "final" %}
-            {% elif slide.layout in ["text", "statement", "bullets", "two_columns", "process"] %}
-                {% set layout_key = "text" %}
-            {% endif %}
-
-            {% set footer_topic = slide.footer or deck_plan.topic or "РљРѕСЂРїРѕСЂР°С‚РёРІРЅР°СЏ РїСЂРµР·РµРЅС‚Р°С†РёСЏ" %}
+            {% set footer_topic = slide.footer or deck_plan.topic or "Корпоративная презентация" %}
             {% set bullets = slide.content.bullets or [] %}
+            {% set composition = slide.ui_design.composition if slide.ui_design else slide.layout %}
+            {% set chart = slide.chart_data or {"type": "none"} %}
+            {% set table = slide.table_data or {"columns": [], "rows": []} %}
 
             <div class="slide-viewport">
                 <section class="slide">
                     <div class="slide-bg"></div>
 
-                    {% if layout_key == "cover" %}
+                    {% if slide.type == "cover" or composition == "hero" %}
                         <div class="brand-zone">
-                            <img src="/static/brand/logo.png" alt="Р›РѕРіРѕС‚РёРї" class="brand-logo">
+                            <img src="/static/brand/logo.png" alt="Логотип" class="brand-logo">
                         </div>
                     {% else %}
                         <div class="slide-header-row">
                             <div class="header-logo">
-                                <img src="/static/brand/logo.png" alt="Р›РѕРіРѕС‚РёРї" class="brand-logo">
+                                <img src="/static/brand/logo.png" alt="Логотип" class="brand-logo">
                             </div>
-
                             <div class="header-title-wrap">
                                 <h1 class="corporate-slide-title">{{ slide.title }}</h1>
                             </div>
-
                             <div class="header-slide-number">{{ slide.number }}</div>
                         </div>
                     {% endif %}
@@ -74,172 +56,198 @@
                         {% if slide.has_png_assets %}
                             <div class="png-assets-layer">
                                 {% for asset in slide.png_assets[:8] %}
-                                    <img
-                                        src="{{ asset.image_path }}"
-                                        alt=""
-                                        class="png-asset png-asset--{{ asset.placement }} png-asset-type--{{ asset.asset_type }}"
-                                    >
+                                    <img src="{{ asset.image_path }}" alt="" class="png-asset png-asset--{{ asset.placement }} png-asset-type--{{ asset.asset_type }}">
                                 {% endfor %}
                             </div>
                         {% endif %}
 
-                        {% if layout_key == "cover" %}
-                            <div class="cover-layout">
-                                <div class="cover-text">
-                                    <p class="cover-kicker line-clamp-1">{{ deck_plan.presentation_type }}</p>
+                        {% if slide.type == "cover" or composition == "hero" %}
+                            <div class="ui-hero">
+                                <div class="ui-hero__copy">
+                                    <div class="section-pill">{{ deck_plan.presentation_type }}</div>
                                     <h1 class="cover-title line-clamp-3">{{ deck_plan.topic or slide.title }}</h1>
-                                    <p class="cover-subtitle line-clamp-2">{{ slide.subtitle or slide.title }}</p>
-                                    <p class="brand-slogan line-clamp-1">{{ brand_config.slogan }}</p>
-                                </div>
-                                <div class="cover-visual">
-                                </div>
-                            </div>
-
-                        {% elif layout_key == "section" %}
-                            <div class="section-layout">
-                                <div class="layout-content">
-                                    <h2 class="section-title line-clamp-3">{{ slide.title }}</h2>
-                                    <p class="section-subtitle line-clamp-3">{{ slide.subtitle or slide.content.speaker_note }}</p>
-                                </div>
-                            </div>
-
-                        {% elif layout_key == "cards" %}
-                            <div class="cards-layout">
-                                <div class="layout-content">
-                                    <div class="cards-grid">
-                                        {% for bullet in bullets[:5] %}
-                                            <div class="metric-card">
-                                                <div class="icon-line icon-route"></div>
-                                                <span>0{{ loop.index }}</span>
-                                                <p class="line-clamp-5">{{ bullet }}</p>
-                                            </div>
-                                        {% endfor %}
-                                        {% if bullets|length > 5 %}
-                                            <div class="metric-card overflow-card">
-                                                <span>+</span>
-                                                <p>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</p>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                        {% elif layout_key == "analytics" %}
-                            <div class="analytics-layout">
-                                <div class="layout-content">
-                                    <div class="kpi-row">
-                                        <div class="metric-card"><div class="icon-line icon-document"></div><span>01</span><p>РџР»Р°РЅ</p></div>
-                                        <div class="metric-card"><div class="icon-line icon-chart"></div><span>02</span><p>Р¤Р°РєС‚</p></div>
-                                        <div class="metric-card"><div class="icon-line icon-shield"></div><span>03</span><p>Р­С„С„РµРєС‚</p></div>
-                                    </div>
-
-                                    {% if slide.needs_chart %}
-                                        <div class="chart-placeholder">
-                                            <div style="height: 42%"></div>
-                                            <div style="height: 68%"></div>
-                                            <div style="height: 54%"></div>
-                                            <div style="height: 82%"></div>
-                                            <div style="height: 63%"></div>
+                                    <p class="cover-subtitle line-clamp-2">{{ slide.subtitle or slide.main_message }}</p>
+                                    {% if slide.main_fact %}
+                                        <div class="insight-card insight-card--hero">
+                                            <span class="micro-label">Главный смысл</span>
+                                            <p class="insight-text line-clamp-3">{{ slide.main_fact }}</p>
                                         </div>
                                     {% endif %}
+                                </div>
+                                <div class="ui-hero__visual">
+                                    <div class="brand-orbit">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    {% if slide.needs_table %}
-                                        <table class="table-placeholder">
-                                            <thead>
-                                                <tr>
-                                                    <th>РџРѕРєР°Р·Р°С‚РµР»СЊ</th>
-                                                    <th>Р—РЅР°С‡РµРЅРёРµ</th>
-                                                    <th>РљРѕРјРјРµРЅС‚Р°СЂРёР№</th>
-                                                </tr>
-                                            </thead>
+                        {% elif composition == "kpi_wall" and slide.kpi_cards %}
+                            <div class="layout-content">
+                                <div class="accent-line"></div>
+                                <p class="insight-title line-clamp-2">{{ slide.main_message or slide.subtitle }}</p>
+                                <div class="kpi-wall">
+                                    {% for card in slide.kpi_cards[:4] %}
+                                        <div class="kpi-card-large">
+                                            <span class="micro-label">{{ card.label }}</span>
+                                            <div><span class="kpi-value">{{ card.value }}</span><span class="kpi-unit">{{ card.unit }}</span></div>
+                                            <p class="kpi-comment line-clamp-2">{{ card.comment }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                        {% elif composition == "data_focus" %}
+                            <div class="layout-content data-focus-layout">
+                                <div class="insight-card data-insight">
+                                    <span class="micro-label">Вывод</span>
+                                    <h2 class="insight-title line-clamp-3">{{ slide.main_fact or slide.main_message }}</h2>
+                                    <p class="insight-text line-clamp-4">{{ slide.subtitle }}</p>
+                                </div>
+                                {% if chart["type"] != "none" %}
+                                    <div class="chart-panel">
+                                        <span class="micro-label">{{ chart.title }}</span>
+                                        <div class="css-bar-chart">
+                                            {% for value in chart["values"][:5] %}
+                                                <div class="css-bar" style="height: {{ 30 + loop.index * 11 }}%">
+                                                    <span>{{ chart["labels"][loop.index0] if chart["labels"]|length > loop.index0 else loop.index }}</span>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% if table["rows"] %}
+                                    <div class="table-panel mini-table-panel">
+                                        <table class="ui-table">
+                                            <thead><tr>{% for column in table["columns"][:3] %}<th>{{ column }}</th>{% endfor %}</tr></thead>
                                             <tbody>
-                                                <tr><td>РџР»Р°РЅ</td><td>--</td><td>РЈС‚РѕС‡РЅРёС‚СЊ</td></tr>
-                                                <tr><td>Р¤Р°РєС‚</td><td>--</td><td>РџСЂРѕРІРµСЂРёС‚СЊ</td></tr>
-                                                <tr><td>РЎСЂРѕРє</td><td>--</td><td>Р—Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ</td></tr>
-                                                <tr><td>Р­С„С„РµРєС‚</td><td>--</td><td>РћС†РµРЅРёС‚СЊ</td></tr>
+                                                {% for row in table["rows"][:3] %}
+                                                    <tr>{% for cell in row[:3] %}<td>{{ cell }}</td>{% endfor %}</tr>
+                                                {% endfor %}
                                             </tbody>
                                         </table>
-                                    {% endif %}
-                                </div>
+                                    </div>
+                                {% endif %}
                             </div>
 
-                        {% elif layout_key == "timeline" %}
-                            <div class="timeline-layout">
-                                <div class="layout-content">
-                                    <div class="timeline">
-                                        {% for bullet in bullets[:5] %}
-                                            <div class="timeline-step">
-                                                <span>{{ loop.index }}</span>
-                                                <p class="line-clamp-4">{{ bullet }}</p>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                    <p class="timeline-note line-clamp-3">
-                                        {% if bullets|length > 5 %}
-                                            Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ
-                                        {% else %}
-                                            {{ slide.subtitle or slide.content.speaker_note }}
-                                        {% endif %}
-                                    </p>
-                                </div>
-                            </div>
-
-                        {% elif layout_key == "risks" %}
-                            <div class="risks-layout">
-                                <div class="layout-content">
-                                    <div class="risk-grid">
-                                        {% for bullet in bullets[:5] %}
-                                            <div>
-                                                <strong>Р РёСЃРє {{ loop.index }}</strong>
-                                                <p class="line-clamp-5">{{ bullet }}</p>
-                                            </div>
-                                        {% endfor %}
-                                        {% if bullets|length > 5 %}
-                                            <div>
-                                                <strong>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ</strong>
-                                                <p>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</p>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                        {% elif layout_key == "final" %}
-                            <div class="final-layout">
-                                <div class="layout-content">
-                                    <div class="final-statement">
-                                        <p class="line-clamp-4">{{ slide.subtitle or "РЎР»РµРґСѓСЋС‰РёР№ С€Р°Рі СЃРѕРіР»Р°СЃРѕРІР°РЅ" }}</p>
-                                    </div>
-                                    <ul class="final-bullets">
-                                        {% for bullet in bullets[:5] %}
-                                            <li class="line-clamp-2">{{ bullet }}</li>
-                                        {% endfor %}
-                                        {% if bullets|length > 5 %}
-                                            <li>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</li>
-                                        {% endif %}
+                        {% elif composition == "split_story" %}
+                            <div class="layout-content split-story-layout">
+                                <div class="insight-card">
+                                    <span class="micro-label">Контекст</span>
+                                    <h2 class="insight-title line-clamp-2">{{ slide.main_fact or slide.subtitle }}</h2>
+                                    <ul class="ui-bullets">
+                                        {% for bullet in bullets[:3] %}<li>{{ bullet }}</li>{% endfor %}
                                     </ul>
-                                    <div class="final-visual">
+                                </div>
+                                <div class="insight-card insight-card--blue">
+                                    <span class="micro-label">Подход</span>
+                                    <p class="insight-text line-clamp-5">{{ slide.main_message or slide.content.speaker_note }}</p>
+                                </div>
+                            </div>
+
+                        {% elif composition == "comparison" %}
+                            <div class="layout-content comparison-grid">
+                                <div class="comparison-before">
+                                    <span class="badge">Исходно</span>
+                                    <h3 class="line-clamp-2">{{ slide.subtitle }}</h3>
+                                    <ul class="ui-bullets">{% for bullet in bullets[:3] %}<li>{{ bullet }}</li>{% endfor %}</ul>
+                                </div>
+                                <div class="comparison-after">
+                                    <span class="badge badge--primary">Целевое состояние</span>
+                                    <h3 class="line-clamp-2">{{ slide.main_message or "Согласованное решение" }}</h3>
+                                    <p class="line-clamp-4">{{ slide.main_fact }}</p>
+                                </div>
+                            </div>
+
+                        {% elif composition == "timeline" %}
+                            <div class="layout-content">
+                                <div class="roadmap-track">
+                                    {% for row in table["rows"][:5] %}
+                                        <div class="roadmap-step">
+                                            <div class="roadmap-dot">{{ loop.index }}</div>
+                                            <strong class="line-clamp-2">{{ row[1] if row|length > 1 else row[0] }}</strong>
+                                            <span class="status-chip">{{ row[2] if row|length > 2 else "план" }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <p class="timeline-note line-clamp-3">{{ slide.main_message or slide.subtitle }}</p>
+                            </div>
+
+                        {% elif composition == "risks" %}
+                            <div class="layout-content risk-grid premium-risk-grid">
+                                {% for row in table["rows"][:5] %}
+                                    <div class="risk-card">
+                                        <span class="status-chip">Риск {{ loop.index }}</span>
+                                        <strong class="line-clamp-2">{{ row[0] }}</strong>
+                                        <p class="line-clamp-3">{{ row[2] if row|length > 2 else slide.main_message }}</p>
                                     </div>
+                                {% endfor %}
+                            </div>
+
+                        {% elif composition == "economics" %}
+                            <div class="layout-content economics-layout">
+                                <div class="decision-effect">
+                                    <span class="micro-label">Эффект</span>
+                                    <h2 class="line-clamp-3">{{ slide.main_fact or slide.main_message }}</h2>
+                                </div>
+                                {% if slide.kpi_cards %}
+                                    <div class="economics-kpis">
+                                        {% for card in slide.kpi_cards[:3] %}
+                                            <div class="kpi-card-large kpi-card-large--compact">
+                                                <span class="kpi-value">{{ card.value }}</span><span class="kpi-unit">{{ card.unit }}</span>
+                                                <p class="kpi-label line-clamp-2">{{ card.label }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                        {% elif composition == "table_focus" and table["rows"] %}
+                            <div class="layout-content table-focus-layout">
+                                <div class="table-panel">
+                                    <table class="ui-table">
+                                        <thead><tr>{% for column in table["columns"][:4] %}<th>{{ column }}</th>{% endfor %}</tr></thead>
+                                        <tbody>
+                                            {% for row in table["rows"][:5] %}
+                                                <tr>{% for cell in row[:4] %}<td>{{ cell }}</td>{% endfor %}</tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        {% elif composition == "chart_focus" and chart["type"] != "none" %}
+                            <div class="layout-content chart-focus-layout">
+                                <h2 class="insight-title line-clamp-2">{{ slide.main_fact or chart.title }}</h2>
+                                <div class="chart-panel chart-panel--wide">
+                                    <div class="css-bar-chart css-bar-chart--wide">
+                                        {% for value in chart["values"][:6] %}
+                                            <div class="css-bar" style="height: {{ 28 + loop.index * 10 }}%">
+                                                <span>{{ chart["labels"][loop.index0] if chart["labels"]|length > loop.index0 else loop.index }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% elif composition == "decision_card" %}
+                            <div class="layout-content decision-panel">
+                                <div class="decision-action">
+                                    <span class="micro-label">Решение</span>
+                                    <h2 class="line-clamp-3">{{ slide.main_message or slide.subtitle }}</h2>
+                                    <ul class="ui-bullets">{% for bullet in bullets[:4] %}<li>{{ bullet }}</li>{% endfor %}</ul>
+                                </div>
+                                <div class="decision-effect">
+                                    <span class="micro-label">Следующий шаг</span>
+                                    <p class="line-clamp-5">{{ slide.main_fact or slide.content.speaker_note }}</p>
                                 </div>
                             </div>
 
                         {% else %}
-                            <div class="text-layout">
-                                <div class="layout-content">
-                                    <p class="text-subtitle line-clamp-2">{{ slide.subtitle }}</p>
-                                    <div class="text-card">
-                                        <ul class="slide-bullets">
-                                            {% for bullet in bullets[:5] %}
-                                                <li class="line-clamp-3">{{ bullet }}</li>
-                                            {% endfor %}
-                                            {% if bullets|length > 5 %}
-                                                <li>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹ РІС‹РЅРµСЃРµРЅС‹ РІ РїСЂРёР»РѕР¶РµРЅРёРµ</li>
-                                            {% endif %}
-                                        </ul>
-                                    </div>
-                                    <div class="text-side-accent">
-                                        <p class="line-clamp-5">{{ slide.content.speaker_note }}</p>
-                                    </div>
+                            <div class="layout-content default-ui-layout">
+                                <div class="insight-card">
+                                    <span class="micro-label">Смысл</span>
+                                    <h2 class="insight-title line-clamp-3">{{ slide.main_fact or slide.subtitle }}</h2>
+                                    <ul class="ui-bullets">{% for bullet in bullets[:4] %}<li>{{ bullet }}</li>{% endfor %}</ul>
                                 </div>
                             </div>
                         {% endif %}

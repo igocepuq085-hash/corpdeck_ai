@@ -761,7 +761,8 @@ body.debug-safe-areas .slide-master-footer {
         background: #ffffff;
     }
 
-    .deck-topbar {
+    .deck-topbar,
+    .deck-toolbar {
         display: none;
     }
 
@@ -792,6 +793,41 @@ body.debug-safe-areas .slide-master-footer {
         inset: 48px 64px 42px 64px;
         grid-template-rows: 64px 1fr 38px;
     }
+}
+
+/* Premium generated deck UI overrides */
+.coordinate-deck .layout-content {
+  position: absolute;
+  left: 0;
+  top: 104px;
+  width: 1424px;
+  height: 496px;
+  overflow: hidden;
+}
+
+.coordinate-deck .kpi-wall {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  width: 1424px;
+  height: 318px;
+  margin-top: 30px;
+}
+
+.coordinate-deck .data-focus-layout,
+.coordinate-deck .chart-focus-layout,
+.coordinate-deck .table-focus-layout,
+.coordinate-deck .economics-layout,
+.coordinate-deck .decision-panel,
+.coordinate-deck .comparison-grid,
+.coordinate-deck .split-story-layout,
+.coordinate-deck .premium-risk-grid {
+  position: absolute;
+  left: 0;
+  top: 104px;
+  width: 1424px;
+  height: 496px;
+  overflow: hidden;
 }
 
 /* Final Gazpromtrans brand overrides. Keep this block last. */
@@ -964,6 +1000,40 @@ body.debug-safe-areas .slide-master-footer {
         linear-gradient(90deg, rgba(255, 255, 255, .10) 1px, transparent 1px),
         var(--brand-gradient-primary);
     background-size: 42px 42px, 42px 42px, cover;
+}
+
+.coordinate-deck .layout-content {
+  position: absolute;
+  left: 0;
+  top: 104px;
+  width: 1424px;
+  height: 496px;
+  overflow: hidden;
+}
+
+.coordinate-deck .data-focus-layout,
+.coordinate-deck .chart-focus-layout,
+.coordinate-deck .table-focus-layout,
+.coordinate-deck .economics-layout,
+.coordinate-deck .decision-panel,
+.coordinate-deck .comparison-grid,
+.coordinate-deck .split-story-layout,
+.coordinate-deck .premium-risk-grid {
+  position: absolute;
+  left: 0;
+  top: 104px;
+  width: 1424px;
+  height: 496px;
+  overflow: hidden;
+}
+
+.coordinate-deck .kpi-wall {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  width: 1424px;
+  height: 318px;
+  margin-top: 30px;
 }
 
 .slide-image-bg {
@@ -1142,6 +1212,474 @@ body.debug-safe-areas .slide-master-footer {
   bottom: 58px;
   width: 132px;
   height: 132px;
+}
+
+.layout-content {
+  position: absolute;
+  left: 0;
+  top: 104px;
+  width: 1424px;
+  height: 496px;
+  overflow: hidden;
+}
+
+.section-pill,
+.badge,
+.status-chip,
+.micro-label {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.section-pill,
+.badge {
+  padding: 8px 14px;
+  color: var(--gpt-foundation);
+  background: rgba(0, 119, 200, .10);
+  border: 1px solid rgba(0, 119, 200, .20);
+  font-size: 16px;
+}
+
+.badge--primary,
+.status-chip {
+  color: #fff;
+  background: var(--brand-gradient-primary);
+}
+
+.status-chip {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.micro-label {
+  color: var(--gpt-foundation);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.accent-line {
+  width: 132px;
+  height: 6px;
+  margin-bottom: 24px;
+  border-radius: 999px;
+  background: var(--brand-gradient-primary);
+}
+
+.ui-hero {
+  position: relative;
+  width: 1424px;
+  height: 600px;
+}
+
+.ui-hero__copy {
+  position: absolute;
+  left: 0;
+  top: 124px;
+  width: 790px;
+  height: 390px;
+}
+
+.ui-hero__visual {
+  position: absolute;
+  right: 74px;
+  top: 112px;
+  width: 420px;
+  height: 330px;
+}
+
+.brand-orbit {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 119, 200, .22);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.74), rgba(102,181,232,.20)),
+    radial-gradient(circle at 70% 28%, rgba(0,119,200,.24), transparent 32%);
+  box-shadow: 0 24px 60px rgba(0, 61, 115, .15);
+  overflow: hidden;
+}
+
+.brand-orbit span {
+  position: absolute;
+  border-radius: 999px;
+  border: 2px solid rgba(0, 119, 200, .28);
+}
+
+.brand-orbit span:nth-child(1) { inset: 54px 72px; }
+.brand-orbit span:nth-child(2) { inset: 96px 118px; }
+.brand-orbit span:nth-child(3) {
+  width: 58px;
+  height: 58px;
+  right: 132px;
+  top: 126px;
+  background: var(--gpt-foundation);
+}
+
+.insight-card,
+.kpi-card-large,
+.data-panel,
+.chart-panel,
+.table-panel,
+.decision-panel,
+.comparison-before,
+.comparison-after,
+.risk-card {
+  border: 1px solid rgba(207, 230, 247, .95);
+  border-top: 6px solid var(--gpt-foundation);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 22px 48px rgba(0, 61, 115, .12);
+  overflow: hidden;
+}
+
+.insight-card {
+  padding: 30px;
+}
+
+.insight-card--hero {
+  margin-top: 26px;
+  width: 620px;
+}
+
+.insight-card--blue {
+  color: #fff;
+  background: var(--brand-gradient-primary);
+  border-color: rgba(102, 181, 232, .4);
+}
+
+.insight-card--blue .micro-label,
+.insight-card--blue .insight-text {
+  color: #fff;
+}
+
+.insight-title {
+  margin: 0 0 14px;
+  color: var(--gpt-corporate);
+  font-size: 34px;
+  line-height: 1.12;
+  font-weight: 800;
+}
+
+.insight-text {
+  margin: 0;
+  color: #31415d;
+  font-size: 23px;
+  line-height: 1.28;
+}
+
+.kpi-wall {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  width: 1424px;
+  height: 318px;
+  margin-top: 30px;
+}
+
+.kpi-card-large {
+  position: relative;
+  padding: 28px 26px;
+}
+
+.kpi-value {
+  color: var(--gpt-foundation);
+  font-family: var(--font-headline);
+  font-size: 64px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.kpi-unit {
+  margin-left: 8px;
+  color: var(--gpt-corporate);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.kpi-label,
+.kpi-comment {
+  margin: 12px 0 0;
+  color: var(--gpt-graphite);
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.kpi-comment {
+  color: #516174;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.data-focus-layout {
+  position: relative;
+}
+
+.data-insight {
+  position: absolute;
+  left: 0;
+  top: 36px;
+  width: 470px;
+  height: 340px;
+}
+
+.chart-panel {
+  position: absolute;
+  left: 540px;
+  top: 34px;
+  width: 570px;
+  height: 330px;
+  padding: 26px 28px;
+}
+
+.mini-table-panel {
+  position: absolute;
+  left: 540px;
+  top: 388px;
+  width: 790px;
+  height: 104px;
+  padding: 0;
+}
+
+.css-bar-chart {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  bottom: 34px;
+  height: 210px;
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  border-bottom: 2px solid rgba(0, 119, 200, .18);
+}
+
+.css-bar {
+  position: relative;
+  flex: 1;
+  min-height: 48px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, var(--gpt-foundation), var(--gpt-technical));
+}
+
+.css-bar span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -28px;
+  color: #516174;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.split-story-layout,
+.comparison-grid,
+.decision-panel,
+.economics-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.split-story-layout .insight-card,
+.comparison-before,
+.comparison-after,
+.decision-action,
+.decision-effect {
+  min-height: 390px;
+  padding: 34px;
+}
+
+.comparison-before {
+  border-top-color: var(--gpt-steel);
+}
+
+.comparison-after {
+  border-top-color: var(--gpt-foundation);
+}
+
+.ui-bullets {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-bullets li {
+  position: relative;
+  margin-bottom: 14px;
+  padding-left: 28px;
+  color: #24344d;
+  font-size: 20px;
+  line-height: 1.28;
+  font-weight: 650;
+}
+
+.ui-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .55em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gpt-foundation);
+}
+
+.roadmap-track {
+  position: absolute;
+  left: 0;
+  top: 95px;
+  width: 1424px;
+  height: 245px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 22px;
+}
+
+.roadmap-step {
+  position: relative;
+  padding: 76px 22px 22px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.86);
+  border: 1px solid rgba(207,230,247,.95);
+  box-shadow: 0 18px 40px rgba(0,61,115,.10);
+}
+
+.roadmap-dot {
+  position: absolute;
+  left: 22px;
+  top: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: var(--gpt-foundation);
+  font-weight: 900;
+}
+
+.roadmap-step strong {
+  display: block;
+  min-height: 72px;
+  color: var(--gpt-corporate);
+  font-size: 20px;
+  line-height: 1.18;
+}
+
+.premium-risk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.risk-card {
+  padding: 28px;
+}
+
+.risk-card strong {
+  display: block;
+  margin: 22px 0 12px;
+  color: var(--gpt-corporate);
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.risk-card p {
+  color: #516174;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.decision-action,
+.decision-effect {
+  border-radius: 22px;
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(207,230,247,.95);
+  box-shadow: 0 22px 48px rgba(0,61,115,.12);
+}
+
+.decision-effect {
+  color: #fff;
+  background: var(--brand-gradient-primary);
+}
+
+.decision-effect .micro-label,
+.decision-effect p,
+.decision-effect h2 {
+  color: #fff;
+}
+
+.decision-action h2,
+.decision-effect h2 {
+  margin: 16px 0 18px;
+  color: var(--gpt-corporate);
+  font-size: 38px;
+  line-height: 1.12;
+}
+
+.economics-kpis {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.kpi-card-large--compact {
+  min-height: 130px;
+}
+
+.table-focus-layout .table-panel {
+  width: 1160px;
+  height: 390px;
+  padding: 0;
+}
+
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.ui-table th {
+  padding: 16px 18px;
+  color: #fff;
+  background: var(--gpt-corporate);
+  text-align: left;
+}
+
+.ui-table td {
+  padding: 14px 18px;
+  color: #203047;
+  border-bottom: 1px solid var(--gpt-atmosphere);
+  background: rgba(255,255,255,.94);
+  font-weight: 650;
+}
+
+.chart-focus-layout .insight-title {
+  width: 900px;
+}
+
+.chart-panel--wide {
+  left: 0;
+  top: 112px;
+  width: 980px;
+  height: 330px;
+}
+
+.css-bar-chart--wide {
+  height: 220px;
+}
+
+.default-ui-layout .insight-card {
+  width: 850px;
+  height: 360px;
 }
 
 .content-zone {

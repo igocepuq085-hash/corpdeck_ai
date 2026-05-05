@@ -10,7 +10,7 @@
     <main class="page">
         <section class="card">
             <h1>AI Brand Deck Studio</h1>
-            <p class="lead">Сервис генерации и улучшения корпоративных презентаций</p>
+            <p class="lead">{{ description }}</p>
 
             <form class="upload-form" action="/upload" method="post" enctype="multipart/form-data">
                 <label>
@@ -27,8 +27,10 @@
                     Тип презентации
                     <select name="deck_type" required>
                         <option value="Корпоративная презентация">Корпоративная презентация</option>
-                        <option value="Pitch deck">Pitch deck</option>
+                        <option value="Проектный доклад">Проектный доклад</option>
                         <option value="Отчет">Отчет</option>
+                        <option value="Обучающая презентация">Обучающая презентация</option>
+                        <option value="Инвестиционное предложение">Инвестиционное предложение</option>
                         <option value="Коммерческое предложение">Коммерческое предложение</option>
                     </select>
                 </label>
