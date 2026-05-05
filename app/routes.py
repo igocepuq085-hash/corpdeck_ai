@@ -8,13 +8,13 @@ from app.ai_service import generate_deck_plan_with_ai
 from app.brand_service import get_default_brand_config
 from app.config import APP_NAME, OPENAI_TEXT_MODEL
 from app.deck_service import (
-    attach_generated_images_to_deck_plan,
+    attach_generated_png_assets_to_deck_plan,
     build_draft_deck_plan,
     load_deck_plan,
     save_deck_plan,
 )
 from app.file_service import extract_text_from_file, save_uploaded_file
-from app.image_service import generate_slide_images
+from app.image_service import generate_slide_png_assets
 
 
 router = APIRouter()
@@ -66,15 +66,21 @@ async def upload_file(
         )
 
     project_id = save_deck_plan(deck_plan)
-    generated_images = generate_slide_images(
-        project_id=project_id,
-        deck_plan=deck_plan,
-        brand_config=brand_config,
-        max_images=5,
-    )
-    deck_plan = attach_generated_images_to_deck_plan(deck_plan, generated_images)
+    png_assets_warning = ""
+    try:
+        generated_png_assets = generate_slide_png_assets(
+            project_id=project_id,
+            deck_plan=deck_plan,
+            brand_config=brand_config,
+            max_assets=8,
+        )
+    except Exception as error:
+        generated_png_assets = []
+        png_assets_warning = str(error)
+
+    deck_plan = attach_generated_png_assets_to_deck_plan(deck_plan, generated_png_assets)
     save_deck_plan(deck_plan, project_id=project_id)
-    generated_ok = [item for item in generated_images if item.get("status") == "ok"]
+    generated_ok = [item for item in generated_png_assets if item.get("status") == "ok"]
 
     return templates.TemplateResponse(
         request,
@@ -91,8 +97,9 @@ async def upload_file(
             "project_id": project_id,
             "plan_source": plan_source,
             "ai_error": ai_error,
-            "generated_images": generated_images,
-            "generated_images_count": len(generated_ok),
+            "generated_png_assets": generated_png_assets,
+            "generated_png_assets_count": len(generated_ok),
+            "png_assets_warning": png_assets_warning,
         },
     )
 

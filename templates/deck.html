@@ -1,22 +1,26 @@
-﻿<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ deck_plan.topic }} - {{ app_name }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ deck_plan.topic | default("Презентация") }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- CSS: /static/css/style.css -->
 </head>
 <body class="deck-body theme-light">
-    <nav class="deck-topbar">
-        <div>
-            <strong>{{ brand_config.brand_name }}</strong>
+    <div class="deck-toolbar">
+        <div class="deck-toolbar__brand">
+            <strong>{{ brand_config.brand_name | default("ООО «Газпромтранс»") }}</strong>
             <span>project_id: {{ project_id }}</span>
         </div>
-        <div class="deck-actions">
-            <a class="button-link secondary-button" href="/">РќР°Р·Р°Рґ</a>
-            <button type="button" onclick="window.print()">РџРµС‡Р°С‚СЊ / PDF С‡РµСЂРµР· Р±СЂР°СѓР·РµСЂ</button>
+
+        <div class="deck-toolbar__actions">
+            <a class="toolbar-button toolbar-button--secondary" href="/">Назад</a>
+            <button class="toolbar-button toolbar-button--primary" type="button" onclick="window.print()">
+                Печать / PDF через браузер
+            </button>
         </div>
-    </nav>
+    </div>
 
     {% set total_slides = deck_plan.slide_count or deck_plan.slides|length %}
 
@@ -48,14 +52,6 @@
                 <section class="slide">
                     <div class="slide-bg"></div>
 
-                    {% if slide.has_generated_image and slide.number != 1 and slide.number != total_slides %}
-                        {% set image_mode = slide.generated_image_mode or "full-soft" %}
-                        <div class="slide-image-bg is-{{ image_mode }}">
-                            <img src="{{ slide.generated_image_path }}" alt="" class="slide-bg-image">
-                            <div class="slide-image-overlay"></div>
-                        </div>
-                    {% endif %}
-
                     {% if layout_key == "cover" %}
                         <div class="brand-zone">
                             <img src="/static/brand/logo.png" alt="Р›РѕРіРѕС‚РёРї" class="brand-logo">
@@ -75,6 +71,18 @@
                     {% endif %}
 
                     <main class="content-zone">
+                        {% if slide.has_png_assets %}
+                            <div class="png-assets-layer">
+                                {% for asset in slide.png_assets[:8] %}
+                                    <img
+                                        src="{{ asset.image_path }}"
+                                        alt=""
+                                        class="png-asset png-asset--{{ asset.placement }} png-asset-type--{{ asset.asset_type }}"
+                                    >
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
                         {% if layout_key == "cover" %}
                             <div class="cover-layout">
                                 <div class="cover-text">
@@ -84,11 +92,6 @@
                                     <p class="brand-slogan line-clamp-1">{{ brand_config.slogan }}</p>
                                 </div>
                                 <div class="cover-visual">
-                                    {% if slide.needs_image %}
-                                        <div class="ai-image-placeholder">
-                                            <span>Изображение будет создано по теме презентации</span>
-                                        </div>
-                                    {% endif %}
                                 </div>
                             </div>
 
@@ -216,11 +219,6 @@
                                         {% endif %}
                                     </ul>
                                     <div class="final-visual">
-                                        {% if slide.needs_image %}
-                                            <div class="ai-image-placeholder">
-                                                <span>Изображение будет создано по теме презентации</span>
-                                            </div>
-                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -240,13 +238,7 @@
                                         </ul>
                                     </div>
                                     <div class="text-side-accent">
-                                        {% if slide.needs_image %}
-                                            <div class="ai-image-placeholder">
-                                                <span>Изображение будет создано по теме презентации</span>
-                                            </div>
-                                        {% else %}
-                                            <p class="line-clamp-5">{{ slide.content.speaker_note }}</p>
-                                        {% endif %}
+                                        <p class="line-clamp-5">{{ slide.content.speaker_note }}</p>
                                     </div>
                                 </div>
                             </div>

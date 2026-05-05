@@ -1,10 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Предпросмотр - {{ app_name }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <main class="page">
@@ -50,22 +50,25 @@
             {% endif %}
 
             <div class="summary">
-                <h3>AI-изображения</h3>
-                <p><strong>Создано изображений:</strong> {{ generated_images_count }}</p>
-                {% if generated_images %}
-                    {% for image in generated_images %}
+                <h3>PNG-элементы</h3>
+                <p><strong>Сгенерировано PNG:</strong> {{ generated_png_assets_count }}</p>
+                {% if png_assets_warning %}
+                    <p><strong>Предупреждение:</strong> {{ png_assets_warning }}</p>
+                {% endif %}
+                {% if generated_png_assets %}
+                    {% for image in generated_png_assets %}
                         <p>
                             <strong>Слайд {{ image.slide_number }}:</strong>
-                            category: {{ image.category or "n/a" }} —
-                            scene: {{ image.scene or "n/a" }} —
-                            mode: {{ image.image_mode or "n/a" }} —
+                            type: {{ image.asset_type or "n/a" }} ·
+                            placement: {{ image.placement or "n/a" }} ·
+                            category: {{ image.category or "n/a" }} ·
                             status: {{ image.status }}
                             {% if image.image_path %} · {{ image.image_path }}{% endif %}
                             {% if image.error %} · {{ image.error }}{% endif %}
                         </p>
                     {% endfor %}
                 {% else %}
-                    <p>Изображения не создавались.</p>
+                    <p>PNG-элементы не создавались.</p>
                 {% endif %}
             </div>
 

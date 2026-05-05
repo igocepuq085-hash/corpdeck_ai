@@ -413,3 +413,24 @@ def attach_generated_images_to_deck_plan(deck_plan: dict, generated_images: list
         slide["generated_image_mode"] = image_info.get("image_mode", "")
 
     return deck_plan
+
+
+def attach_generated_png_assets_to_deck_plan(deck_plan: dict, generated_assets: list[dict]) -> dict:
+    assets_by_slide = {}
+    for item in generated_assets:
+        if item.get("status") != "ok" or not item.get("image_path"):
+            continue
+        assets_by_slide.setdefault(item.get("slide_number"), []).append(item)
+
+    slides = deck_plan.get("slides") or []
+    for slide in slides:
+        slide_assets = assets_by_slide.get(slide.get("number"), [])
+        slide["png_assets"] = slide_assets
+        slide["has_png_assets"] = bool(slide_assets)
+        slide["generated_image_path"] = ""
+        slide["has_generated_image"] = False
+        slide["generated_image_category"] = ""
+        slide["generated_image_scene"] = ""
+        slide["generated_image_mode"] = ""
+
+    return deck_plan
