@@ -27,7 +27,7 @@ async def index(request: Request):
         "index.html",
         {
             "request": request,
-            "app_name": APP_NAME,
+            "app_name": "AI Brand Deck Studio",
             "description": "Сервис генерации и улучшения корпоративных презентаций",
         },
     )
