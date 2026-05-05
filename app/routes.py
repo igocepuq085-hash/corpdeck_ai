@@ -28,6 +28,7 @@ async def index(request: Request):
         {
             "request": request,
             "app_name": APP_NAME,
+            "description": "Сервис генерации и улучшения корпоративных презентаций",
         },
     )
 
