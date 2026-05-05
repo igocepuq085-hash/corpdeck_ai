@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from app.ai_service import analyze_source_material_with_ai, generate_deck_plan_with_ai, validate_and_normalize_deck_plan
 from app.brand_service import get_default_brand_config
 from app.config import APP_NAME, OPENAI_TEXT_MODEL
+from app.decor_service import attach_decor_layers_to_deck_plan
 from app.deck_service import (
     attach_generated_png_assets_to_deck_plan,
     build_draft_deck_plan,
@@ -103,6 +104,7 @@ async def upload_file(
         png_assets_warning = str(error)
 
     deck_plan = attach_generated_png_assets_to_deck_plan(deck_plan, generated_png_assets)
+    deck_plan = attach_decor_layers_to_deck_plan(deck_plan)
     quality_report = evaluate_deck_quality(deck_plan, source_analysis)
     deck_plan["quality_report"] = quality_report
     save_deck_plan(deck_plan, project_id=project_id)

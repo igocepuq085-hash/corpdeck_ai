@@ -114,6 +114,24 @@
                 {% endif %}
             </div>
 
+            <h2>Декоративные слои</h2>
+            <div class="slides-list">
+                {% for slide in deck_plan.slides %}
+                    {% set decor = slide.decorative_layer or {} %}
+                    <article class="slide-item">
+                        <div class="slide-head">
+                            <strong>{{ slide.number }}. {{ slide.title }}</strong>
+                            <span>{{ decor.category or "general" }}</span>
+                        </div>
+                        <p class="slide-flags">
+                            asset_id: {{ decor.asset_id or "нет" }} ·
+                            enabled: {{ decor.enabled }} ·
+                            placement: {{ decor.placement or "none" }}
+                        </p>
+                    </article>
+                {% endfor %}
+            </div>
+
             <h2>Quality score</h2>
             <div class="summary">
                 <p><strong>Оценка:</strong> {{ quality_report.score }} / 100</p>
