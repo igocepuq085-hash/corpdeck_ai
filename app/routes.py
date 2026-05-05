@@ -24,9 +24,9 @@ templates = Jinja2Templates(directory="templates")
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(
+        request,
         "index.html",
         {
-            "request": request,
             "app_name": "AI Brand Deck Studio",
             "description": "Сервис генерации и улучшения корпоративных презентаций",
         },
@@ -77,9 +77,9 @@ async def upload_file(
     generated_ok = [item for item in generated_images if item.get("status") == "ok"]
 
     return templates.TemplateResponse(
+        request,
         "preview.html",
         {
-            "request": request,
             "app_name": APP_NAME,
             "filename": file.filename,
             "saved_filename": saved_path.name,
@@ -105,9 +105,9 @@ async def deck(request: Request, project_id: str):
         raise HTTPException(status_code=404, detail=str(error)) from error
 
     return templates.TemplateResponse(
+        request,
         "deck.html",
         {
-            "request": request,
             "app_name": APP_NAME,
             "project_id": project_id,
             "deck_plan": deck_plan,
