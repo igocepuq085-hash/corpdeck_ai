@@ -3,259 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ deck_plan.topic | default("Презентация") }}</title>
+    <title>{{ deck_plan.topic | default("Deck") }}</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <!-- CSS: /static/css/style.css -->
+    <script src="/static/js/deck.js" defer></script>
 </head>
-<body class="deck-body theme-light">
-    <div class="deck-toolbar">
+<body class="deck-body mvp-deck-body{% if debug %} debug-render{% endif %}">
+    <div class="deck-toolbar deck-toolbar--clean">
         <div class="deck-toolbar__brand">
-            <strong>{{ brand_config.brand_name | default("ООО «Газпромтранс»") }}</strong>
+            <strong>{{ brand_config.brand_name | default("Gazpromtrans") }}</strong>
             <span>project_id: {{ project_id }}</span>
         </div>
-
         <div class="deck-toolbar__actions">
-            <a class="toolbar-button toolbar-button--secondary" href="/">Назад</a>
+            <a class="toolbar-button toolbar-button--secondary" href="/">&#1053;&#1072;&#1079;&#1072;&#1076;</a>
             <button class="toolbar-button toolbar-button--primary" type="button" onclick="window.print()">
-                Печать / PDF через браузер
+                &#1055;&#1077;&#1095;&#1072;&#1090;&#1100; / PDF &#1095;&#1077;&#1088;&#1077;&#1079; &#1073;&#1088;&#1072;&#1091;&#1079;&#1077;&#1088;
             </button>
         </div>
     </div>
 
-    {% set total_slides = deck_plan.slide_count or deck_plan.slides|length %}
+    {% set slides = deck_plan.slide_plan if deck_plan.slide_plan else [] %}
+    {% set total_slides = deck_plan.slide_count or slides|length %}
 
-    <main class="deck-wrapper coordinate-deck" data-brand="{{ brand_config.brand_name }}">
-        {% for slide in deck_plan.slides %}
-            {% set footer_topic = slide.footer or deck_plan.topic or "Корпоративная презентация" %}
-            {% set bullets = slide.content.bullets or [] %}
-            {% set composition = slide.ui_design.composition if slide.ui_design else slide.layout %}
-            {% set chart = slide.chart_data or {"type": "none"} %}
-            {% set table = slide.table_data or {"columns": [], "rows": []} %}
+    <main class="deck-wrapper mvp-deck-wrapper">
+        {% for plan in slides %}
+            {% set slide_no = plan.slide_no or loop.index %}
+            {% set layout = plan.layout_type or "problem_metrics_light" %}
+            {% if loop.first %}
+                {% set layout = "cover_light" %}
+            {% elif loop.last %}
+                {% set layout = "final_light" %}
+            {% elif layout not in ["cover_light", "problem_metrics_light", "data_dashboard_light", "roadmap_light", "final_light"] %}
+                {% set layout = "problem_metrics_light" %}
+            {% endif %}
+
+            {% set title = plan.title or ("&#1057;&#1083;&#1072;&#1081;&#1076; " ~ slide_no) %}
+            {% set subtitle = plan.subtitle or "" %}
+            {% set message = plan.message or subtitle %}
+            {% set generic_deck_type = deck_plan.presentation_type or "" %}
+            {% set is_generic_subtitle = subtitle and (subtitle == generic_deck_type or subtitle|lower in ["корпоративная презентация", "corporate presentation"]) %}
+            {% set is_generic_message = message and (message == generic_deck_type or message|lower in ["корпоративная презентация", "corporate presentation"]) %}
+            {% set title_class = "is-long-title" if title|length > 44 else ("is-medium-title" if title|length > 28 else "is-short-title") %}
+            {% set message_class = "is-long-message" if message|length > 88 else ("is-medium-message" if message|length > 58 else "is-short-message") %}
+            {% set content_blocks = plan.content_blocks if plan.content_blocks else [] %}
+            {% set data_blocks = plan.data_blocks if plan.data_blocks else [] %}
+            {% set charts = plan.charts if plan.charts else [] %}
+            {% set tables = plan.tables if plan.tables else [] %}
+            {% set asset = plan.visual_asset or {} %}
+            {% set visual_file = asset.file if asset.enabled and asset.file else "" %}
+            {% set footer_topic = deck_plan.topic or title %}
 
             <div class="slide-viewport">
-                <section class="slide">
-                    <div class="slide-bg"></div>
+                <section class="slide mvp-slide layout-{{ layout|replace('_', '-') }} {{ title_class }} {{ message_class }}">
+                    <div class="premium-light-bg"></div>
 
-                    {% if slide.type == "cover" or composition == "hero" %}
-                        <div class="brand-zone">
-                            <img src="/static/brand/logo.png" alt="Логотип" class="brand-logo">
-                        </div>
-                    {% else %}
-                        <div class="slide-header-row">
-                            <div class="header-logo">
-                                <img src="/static/brand/logo.png" alt="Логотип" class="brand-logo">
-                            </div>
-                            <div class="header-title-wrap">
-                                <h1 class="corporate-slide-title">{{ slide.title }}</h1>
-                            </div>
-                            <div class="header-slide-number">{{ slide.number }}</div>
+                    {% if debug %}
+                        <div class="render-debug-badges">
+                            <span>{{ layout }}</span>
+                            <span>{{ plan.role or "context" }}</span>
+                            <span>{{ asset.id or "css_fallback" }}</span>
                         </div>
                     {% endif %}
 
-                    <main class="content-zone">
-                        {% if slide.has_png_assets %}
-                            <div class="png-assets-layer">
-                                {% for asset in slide.png_assets[:8] %}
-                                    <img src="{{ asset.image_path }}" alt="" class="png-asset png-asset--{{ asset.placement }} png-asset-type--{{ asset.asset_type }}">
-                                {% endfor %}
+                    {% if layout != "cover_light" %}
+                        <header class="mvp-slide-header">
+                            <div class="mvp-logo-plaque">
+                                <img src="/static/brand/logo.png" alt="" class="mvp-logo">
                             </div>
-                        {% endif %}
+                            <h1 class="mvp-header-title">{{ title }}</h1>
+                        </header>
+                    {% endif %}
 
-                        {% if slide.type == "cover" or composition == "hero" %}
-                            <div class="ui-hero">
-                                <div class="ui-hero__copy">
-                                    <div class="section-pill">{{ deck_plan.presentation_type }}</div>
-                                    <h1 class="cover-title line-clamp-3">{{ deck_plan.topic or slide.title }}</h1>
-                                    <p class="cover-subtitle line-clamp-2">{{ slide.subtitle or slide.main_message }}</p>
-                                    {% if slide.main_fact %}
-                                        <div class="insight-card insight-card--hero">
-                                            <span class="micro-label">Главный смысл</span>
-                                            <p class="insight-text line-clamp-3">{{ slide.main_fact }}</p>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div class="ui-hero__visual">
-                                    <div class="brand-orbit">
-                                        <span></span><span></span><span></span>
-                                    </div>
-                                </div>
-                            </div>
+                    {% if layout == "cover_light" %}
+                        <div class="mvp-cover-logo">
+                            <img src="/static/brand/logo.png" alt="" class="mvp-logo mvp-logo--cover">
+                        </div>
+                        <section class="mvp-cover-left">
+                            <h1 class="mvp-cover-title">{{ title }}</h1>
+                            {% if subtitle and not is_generic_subtitle %}
+                                <p class="mvp-cover-subtitle">{{ subtitle }}</p>
+                            {% endif %}
+                            {% if message and not is_generic_message %}
+                                <div class="mvp-summary-card">{{ message }}</div>
+                            {% endif %}
+                        </section>
+                        <aside class="mvp-hero-stage">
+                            {% if visual_file %}
+                                <img src="{{ visual_file }}" alt="" class="mvp-hero-image">
+                            {% else %}
+                                <div class="mvp-visual-fallback mvp-visual-fallback--hero"></div>
+                            {% endif %}
+                        </aside>
 
-                        {% elif composition == "kpi_wall" and slide.kpi_cards %}
-                            <div class="layout-content">
-                                <div class="accent-line"></div>
-                                <p class="insight-title line-clamp-2">{{ slide.main_message or slide.subtitle }}</p>
-                                <div class="kpi-wall">
-                                    {% for card in slide.kpi_cards[:4] %}
-                                        <div class="kpi-card-large">
-                                            <span class="micro-label">{{ card.label }}</span>
-                                            <div><span class="kpi-value">{{ card.value }}</span><span class="kpi-unit">{{ card.unit }}</span></div>
-                                            <p class="kpi-comment line-clamp-2">{{ card.comment }}</p>
-                                        </div>
+                    {% elif layout == "data_dashboard_light" %}
+                        <main class="mvp-content mvp-data-layout">
+                            <section class="mvp-insight-card">
+                                <h2>{{ message or title }}</h2>
+                                {% if subtitle %}<p>{{ subtitle }}</p>{% endif %}
+                            </section>
+                            {% if data_blocks or charts or tables %}
+                                <section class="mvp-kpi-grid">
+                                    {% for block in data_blocks[:4] %}
+                                        <article class="mvp-kpi-card">
+                                            <span>{{ block.label }}</span>
+                                            <strong>{{ block.value }}</strong>
+                                            {% if block.unit %}<em>{{ block.unit }}</em>{% endif %}
+                                            {% if block.comment %}<p>{{ block.comment }}</p>{% endif %}
+                                        </article>
                                     {% endfor %}
-                                </div>
-                            </div>
-
-                        {% elif composition == "data_focus" %}
-                            <div class="layout-content data-focus-layout">
-                                <div class="insight-card data-insight">
-                                    <span class="micro-label">Вывод</span>
-                                    <h2 class="insight-title line-clamp-3">{{ slide.main_fact or slide.main_message }}</h2>
-                                    <p class="insight-text line-clamp-4">{{ slide.subtitle }}</p>
-                                </div>
-                                {% if chart["type"] != "none" %}
-                                    <div class="chart-panel">
-                                        <span class="micro-label">{{ chart.title }}</span>
-                                        <div class="css-bar-chart">
-                                            {% for value in chart["values"][:5] %}
-                                                <div class="css-bar" style="height: {{ 30 + loop.index * 11 }}%">
-                                                    <span>{{ chart["labels"][loop.index0] if chart["labels"]|length > loop.index0 else loop.index }}</span>
+                                </section>
+                                <section class="mvp-data-panel">
+                                    {% if charts %}
+                                        {% set chart = charts[0] %}
+                                        <h3>{{ chart.title or "Показатели" }}</h3>
+                                        <div class="mvp-chart-fallback mvp-chart-{{ chart.chart_type }}">
+                                            {% for point in chart.render_points[:6] %}
+                                                <div class="mvp-chart-row">
+                                                    <span>{{ point.label }}</span>
+                                                    <div><i style="width: {{ point.width }}%"></i></div>
+                                                    <strong>{{ point.value }}{% if chart.unit %} {{ chart.unit }}{% endif %}</strong>
                                                 </div>
                                             {% endfor %}
                                         </div>
-                                    </div>
-                                {% endif %}
-                                {% if table["rows"] %}
-                                    <div class="table-panel mini-table-panel">
-                                        <table class="ui-table">
-                                            <thead><tr>{% for column in table["columns"][:3] %}<th>{{ column }}</th>{% endfor %}</tr></thead>
+                                        {% if chart.source_note %}<p class="mvp-source-note">{{ chart.source_note }}</p>{% endif %}
+                                        <canvas class="mvp-chart-canvas" data-chart='{{ chart|tojson }}'></canvas>
+                                    {% elif tables %}
+                                        {% set table = tables[0] %}
+                                        <h3>{{ table.title or "Данные" }}</h3>
+                                        <table class="mvp-table">
+                                            <thead>
+                                                <tr>
+                                                    {% for column in table.columns %}
+                                                        <th>{{ column }}</th>
+                                                    {% endfor %}
+                                                </tr>
+                                            </thead>
                                             <tbody>
-                                                {% for row in table["rows"][:3] %}
-                                                    <tr>{% for cell in row[:3] %}<td>{{ cell }}</td>{% endfor %}</tr>
+                                                {% for row in table.rows %}
+                                                    <tr>
+                                                        {% for cell in row %}
+                                                            <td>{{ cell }}</td>
+                                                        {% endfor %}
+                                                    </tr>
                                                 {% endfor %}
                                             </tbody>
                                         </table>
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                        {% elif composition == "split_story" %}
-                            <div class="layout-content split-story-layout">
-                                <div class="insight-card">
-                                    <span class="micro-label">Контекст</span>
-                                    <h2 class="insight-title line-clamp-2">{{ slide.main_fact or slide.subtitle }}</h2>
-                                    <ul class="ui-bullets">
-                                        {% for bullet in bullets[:3] %}<li>{{ bullet }}</li>{% endfor %}
-                                    </ul>
-                                </div>
-                                <div class="insight-card insight-card--blue">
-                                    <span class="micro-label">Подход</span>
-                                    <p class="insight-text line-clamp-5">{{ slide.main_message or slide.content.speaker_note }}</p>
-                                </div>
-                            </div>
-
-                        {% elif composition == "comparison" %}
-                            <div class="layout-content comparison-grid">
-                                <div class="comparison-before">
-                                    <span class="badge">Исходно</span>
-                                    <h3 class="line-clamp-2">{{ slide.subtitle }}</h3>
-                                    <ul class="ui-bullets">{% for bullet in bullets[:3] %}<li>{{ bullet }}</li>{% endfor %}</ul>
-                                </div>
-                                <div class="comparison-after">
-                                    <span class="badge badge--primary">Целевое состояние</span>
-                                    <h3 class="line-clamp-2">{{ slide.main_message or "Согласованное решение" }}</h3>
-                                    <p class="line-clamp-4">{{ slide.main_fact }}</p>
-                                </div>
-                            </div>
-
-                        {% elif composition == "timeline" %}
-                            <div class="layout-content">
-                                <div class="roadmap-track">
-                                    {% for row in table["rows"][:5] %}
-                                        <div class="roadmap-step">
-                                            <div class="roadmap-dot">{{ loop.index }}</div>
-                                            <strong class="line-clamp-2">{{ row[1] if row|length > 1 else row[0] }}</strong>
-                                            <span class="status-chip">{{ row[2] if row|length > 2 else "план" }}</span>
-                                        </div>
+                                        {% if table.source_note %}<p class="mvp-source-note">{{ table.source_note }}</p>{% endif %}
+                                    {% else %}
+                                        <h3>Показатели</h3>
+                                        {% for block in data_blocks[:5] %}
+                                            <div class="mvp-data-row">
+                                                <span>{{ block.label }}</span>
+                                                <i style="width: {{ 28 + loop.index * 12 }}%"></i>
+                                                <strong>{{ block.value }}{% if block.unit %} {{ block.unit }}{% endif %}</strong>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </section>
+                            {% elif content_blocks %}
+                                <section class="mvp-card-list">
+                                    {% for block in content_blocks[:3] %}
+                                        <article class="mvp-small-card">
+                                            <p>{{ block.text }}</p>
+                                        </article>
                                     {% endfor %}
-                                </div>
-                                <p class="timeline-note line-clamp-3">{{ slide.main_message or slide.subtitle }}</p>
-                            </div>
+                                </section>
+                            {% endif %}
+                        </main>
 
-                        {% elif composition == "risks" %}
-                            <div class="layout-content risk-grid premium-risk-grid">
-                                {% for row in table["rows"][:5] %}
-                                    <div class="risk-card">
-                                        <span class="status-chip">Риск {{ loop.index }}</span>
-                                        <strong class="line-clamp-2">{{ row[0] }}</strong>
-                                        <p class="line-clamp-3">{{ row[2] if row|length > 2 else slide.main_message }}</p>
-                                    </div>
+                    {% elif layout == "roadmap_light" %}
+                        <main class="mvp-content mvp-roadmap-layout">
+                            <section class="mvp-roadmap-message">
+                                <h2>{{ message or title }}</h2>
+                            </section>
+                            <section class="mvp-roadmap-track">
+                                {% for block in content_blocks[:5] %}
+                                    <article class="mvp-roadmap-step">
+                                        <span>{{ "%02d"|format(loop.index) }}</span>
+                                        <p>{{ block.text }}</p>
+                                    </article>
                                 {% endfor %}
-                            </div>
+                            </section>
+                            {% if not content_blocks %}
+                                <section class="mvp-roadmap-track mvp-roadmap-track--empty">
+                                    <article class="mvp-roadmap-step"><span>01</span><strong>&#1040;&#1085;&#1072;&#1083;&#1080;&#1079;</strong><p>&#1069;&#1090;&#1072;&#1087;&#1099; &#1085;&#1077; &#1076;&#1077;&#1090;&#1072;&#1083;&#1080;&#1079;&#1080;&#1088;&#1086;&#1074;&#1072;&#1085;&#1099; &#1074; &#1080;&#1089;&#1093;&#1086;&#1076;&#1085;&#1080;&#1082;&#1077;.</p></article>
+                                    <article class="mvp-roadmap-step"><span>02</span><strong>&#1055;&#1083;&#1072;&#1085;</strong><p>&#1055;&#1083;&#1072;&#1085; &#1090;&#1088;&#1077;&#1073;&#1091;&#1077;&#1090; &#1091;&#1090;&#1086;&#1095;&#1085;&#1077;&#1085;&#1080;&#1103; &#1087;&#1086; &#1080;&#1089;&#1093;&#1086;&#1076;&#1085;&#1099;&#1084; &#1076;&#1072;&#1085;&#1085;&#1099;&#1084;.</p></article>
+                                    <article class="mvp-roadmap-step"><span>03</span><strong>&#1050;&#1086;&#1085;&#1090;&#1088;&#1086;&#1083;&#1100;</strong><p>&#1056;&#1077;&#1079;&#1091;&#1083;&#1100;&#1090;&#1072;&#1090; &#1092;&#1080;&#1082;&#1089;&#1080;&#1088;&#1091;&#1077;&#1090;&#1089;&#1103; &#1074; &#1080;&#1090;&#1086;&#1075;&#1086;&#1074;&#1086;&#1084; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1080;.</p></article>
+                                </section>
+                            {% endif %}
+                        </main>
 
-                        {% elif composition == "economics" %}
-                            <div class="layout-content economics-layout">
-                                <div class="decision-effect">
-                                    <span class="micro-label">Эффект</span>
-                                    <h2 class="line-clamp-3">{{ slide.main_fact or slide.main_message }}</h2>
-                                </div>
-                                {% if slide.kpi_cards %}
-                                    <div class="economics-kpis">
-                                        {% for card in slide.kpi_cards[:3] %}
-                                            <div class="kpi-card-large kpi-card-large--compact">
-                                                <span class="kpi-value">{{ card.value }}</span><span class="kpi-unit">{{ card.unit }}</span>
-                                                <p class="kpi-label line-clamp-2">{{ card.label }}</p>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
+                    {% elif layout == "final_light" %}
+                        <main class="mvp-content mvp-final-layout">
+                            <section class="mvp-final-message">
+                                <h2>{{ message or title }}</h2>
+                                {% if subtitle %}<p>{{ subtitle }}</p>{% endif %}
+                            </section>
+                            {% if content_blocks %}
+                                <section class="mvp-final-cards">
+                                    {% for block in content_blocks[:3] %}
+                                        <article class="mvp-small-card">
+                                            <p>{{ block.text }}</p>
+                                        </article>
+                                    {% endfor %}
+                                </section>
+                            {% endif %}
+                            {% if visual_file %}
+                                <aside class="mvp-side-visual">
+                                    <img src="{{ visual_file }}" alt="" class="mvp-side-image">
+                                </aside>
+                            {% endif %}
+                        </main>
 
-                        {% elif composition == "table_focus" and table["rows"] %}
-                            <div class="layout-content table-focus-layout">
-                                <div class="table-panel">
-                                    <table class="ui-table">
-                                        <thead><tr>{% for column in table["columns"][:4] %}<th>{{ column }}</th>{% endfor %}</tr></thead>
-                                        <tbody>
-                                            {% for row in table["rows"][:5] %}
-                                                <tr>{% for cell in row[:4] %}<td>{{ cell }}</td>{% endfor %}</tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                    {% else %}
+                        <main class="mvp-content mvp-problem-layout">
+                            <section class="mvp-main-statement">
+                                <h2>{{ message or title }}</h2>
+                                {% if subtitle %}<p>{{ subtitle }}</p>{% endif %}
+                            </section>
+                            {% if content_blocks %}
+                                <section class="mvp-card-list">
+                                    {% for block in content_blocks[:3] %}
+                                        <article class="mvp-small-card">
+                                            <p>{{ block.text }}</p>
+                                        </article>
+                                    {% endfor %}
+                                </section>
+                            {% endif %}
+                            {% if visual_file %}
+                                <aside class="mvp-side-visual">
+                                    <img src="{{ visual_file }}" alt="" class="mvp-side-image">
+                                </aside>
+                            {% endif %}
+                        </main>
+                    {% endif %}
 
-                        {% elif composition == "chart_focus" and chart["type"] != "none" %}
-                            <div class="layout-content chart-focus-layout">
-                                <h2 class="insight-title line-clamp-2">{{ slide.main_fact or chart.title }}</h2>
-                                <div class="chart-panel chart-panel--wide">
-                                    <div class="css-bar-chart css-bar-chart--wide">
-                                        {% for value in chart["values"][:6] %}
-                                            <div class="css-bar" style="height: {{ 28 + loop.index * 10 }}%">
-                                                <span>{{ chart["labels"][loop.index0] if chart["labels"]|length > loop.index0 else loop.index }}</span>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-
-                        {% elif composition == "decision_card" %}
-                            <div class="layout-content decision-panel">
-                                <div class="decision-action">
-                                    <span class="micro-label">Решение</span>
-                                    <h2 class="line-clamp-3">{{ slide.main_message or slide.subtitle }}</h2>
-                                    <ul class="ui-bullets">{% for bullet in bullets[:4] %}<li>{{ bullet }}</li>{% endfor %}</ul>
-                                </div>
-                                <div class="decision-effect">
-                                    <span class="micro-label">Следующий шаг</span>
-                                    <p class="line-clamp-5">{{ slide.main_fact or slide.content.speaker_note }}</p>
-                                </div>
-                            </div>
-
-                        {% else %}
-                            <div class="layout-content default-ui-layout">
-                                <div class="insight-card">
-                                    <span class="micro-label">Смысл</span>
-                                    <h2 class="insight-title line-clamp-3">{{ slide.main_fact or slide.subtitle }}</h2>
-                                    <ul class="ui-bullets">{% for bullet in bullets[:4] %}<li>{{ bullet }}</li>{% endfor %}</ul>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </main>
-
-                    <div class="footer-line"></div>
-                    <footer class="footer-topic">{{ footer_topic }}</footer>
-                    <div class="footer-page">{{ slide.number }} / {{ total_slides }}</div>
+                    <div class="mvp-footer-line"></div>
+                    <footer class="mvp-footer-topic">{{ footer_topic }}</footer>
+                    <div class="mvp-page-number">{{ slide_no }} / {{ total_slides }}</div>
                 </section>
             </div>
         {% endfor %}

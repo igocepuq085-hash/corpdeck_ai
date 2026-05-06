@@ -3,169 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Предпросмотр - {{ app_name }}</title>
+    <title>Preview · {{ app_name }}</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <main class="page">
-        <section class="card wide-card">
-            <h1>Презентация подготовлена</h1>
-            <p class="lead">Документ разобран, сформирована структура слайдов, UI-композиции и проверка качества.</p>
-
-            <h2>Статус обработки</h2>
-            <div class="summary">
-                <p><strong>Файл:</strong> {{ filename }}</p>
-                <p><strong>Тема:</strong> {{ topic }}</p>
-                <p><strong>Тип презентации:</strong> {{ deck_type }}</p>
-                <p><strong>Тип файла:</strong> {{ extraction.file_type }}</p>
-                <p><strong>Статус извлечения:</strong> {{ extraction.status }}</p>
-                <p><strong>Символов извлечено:</strong> {{ extraction.characters }}</p>
-                <p><strong>Источник плана:</strong> {{ plan_source }}</p>
-                {% if analysis_error %}
-                    <p><strong>Анализ AI:</strong> использован локальный разбор. Причина: {{ analysis_error }}</p>
-                {% endif %}
-                {% if ai_error %}
-                    <p><strong>План AI:</strong> использован локальный режим. Причина: {{ ai_error }}</p>
-                {% endif %}
-            </div>
-
-            <h2>Разбор исходного материала</h2>
-            <div class="plan-grid">
-                <div class="summary">
-                    <p><strong>Главная тема:</strong> {{ source_analysis.main_theme }}</p>
-                    <p><strong>Главный смысл:</strong> {{ source_analysis.main_message }}</p>
-                    <p><strong>Домен:</strong> {{ source_analysis.domain }}</p>
-                    <p><strong>Аудитория:</strong> {{ source_analysis.audience }}</p>
-                    <p><strong>Тон:</strong> {{ source_analysis.tone }}</p>
+    <main class="page preview-page">
+        <section class="card">
+            <div class="preview-hero">
+                <div>
+                    <p class="eyebrow">Предпросмотр</p>
+                    <h1>Проверка презентации</h1>
+                    <p class="lead">Сервис извлек текст, собрал структуру и подготовил HTML-презентацию.</p>
                 </div>
-                <div class="summary">
-                    <p><strong>Проблема:</strong> {{ source_analysis.problem }}</p>
-                    <p><strong>Почему важно:</strong> {{ source_analysis.why_it_matters }}</p>
-                    <p><strong>Решение:</strong> {{ source_analysis.proposed_solution }}</p>
-                    <p><strong>Ожидаемый результат:</strong> {{ source_analysis.expected_result }}</p>
+                <a class="button" href="/deck/{{ project_id }}">Открыть HTML-презентацию</a>
+            </div>
+
+            <section class="preview-section">
+                <h2>Статус обработки</h2>
+                <div class="preview-grid">
+                    <div class="info-card">
+                        <strong>Файл</strong>
+                        <span>{{ filename }}</span>
+                    </div>
+                    <div class="info-card">
+                        <strong>Тема</strong>
+                        <span>{{ topic }}</span>
+                    </div>
+                    <div class="info-card">
+                        <strong>Тип</strong>
+                        <span>{{ deck_type }}</span>
+                    </div>
+                    <div class="info-card">
+                        <strong>Источник плана</strong>
+                        <span>{{ plan_source }}</span>
+                    </div>
+                    <div class="info-card">
+                        <strong>Извлечение текста</strong>
+                        <span>{{ extraction.status or "ok" }} · {{ extraction.text_length or extraction.text|length }}</span>
+                    </div>
+                    <div class="info-card">
+                        <strong>project_id</strong>
+                        <span>{{ project_id }}</span>
+                    </div>
                 </div>
-            </div>
 
-            <h2>Найденные факты</h2>
-            <div class="slides-list">
-                {% for fact in source_analysis.key_facts[:6] %}
-                    <article class="slide-item">
-                        <div class="slide-head">
-                            <strong>{{ fact.fact }}</strong>
-                            <span>{{ fact.importance }}</span>
-                        </div>
-                        <p>{{ fact.source_context }}</p>
-                    </article>
-                {% else %}
-                    <p class="note">Факты не найдены или исходный текст слишком короткий.</p>
-                {% endfor %}
-            </div>
-
-            <h2>Найденные числа</h2>
-            <div class="summary">
-                {% if source_analysis.numbers %}
-                    {% for item in source_analysis.numbers[:10] %}
-                        <p><strong>{{ item.value }} {{ item.unit }}</strong> — {{ item.meaning }} <span class="note">({{ item.recommended_use }})</span></p>
-                    {% endfor %}
-                {% else %}
-                    <p>Числа не найдены. План построен без выдуманных KPI.</p>
+                {% if document_diagnostics_error or slide_plan_error or analysis_error or ai_error %}
+                    <div class="warning-box">
+                        {% if document_diagnostics_error %}<p>Диагностика документа: {{ document_diagnostics_error }}</p>{% endif %}
+                        {% if slide_plan_error %}<p>План слайдов: {{ slide_plan_error }}</p>{% endif %}
+                        {% if analysis_error %}<p>Анализ материала: {{ analysis_error }}</p>{% endif %}
+                        {% if ai_error %}<p>Deck plan: {{ ai_error }}</p>{% endif %}
+                    </div>
                 {% endif %}
-            </div>
+            </section>
 
-            <h2>Сформированная структура и UI-композиции</h2>
-            <div class="slides-list">
-                {% for slide in deck_plan.slides %}
-                    <article class="slide-item">
-                        <div class="slide-head">
-                            <strong>{{ slide.number }}. {{ slide.title }}</strong>
-                            <span>{{ slide.ui_design.composition if slide.ui_design else slide.layout }}</span>
-                        </div>
-                        <p>{{ slide.main_fact or slide.subtitle }}</p>
-                        <p class="slide-flags">
-                            KPI: {{ slide.kpi_cards|length }} ·
-                            График: {{ "да" if slide.chart_data and slide.chart_data["type"] != "none" else "нет" }} ·
-                            Таблица: {{ "да" if slide.table_data and slide.table_data["rows"] else "нет" }} ·
-                            PNG: {{ "да" if slide.png_assets_required else "нет" }}
-                        </p>
-                    </article>
-                {% endfor %}
-            </div>
+            <section class="preview-section">
+                <h2>Итоговая проверка</h2>
+                {% set metrics = quality_report.metrics or {} %}
+                <div class="quality-panel quality-{{ quality_report.status or 'warning' }}">
+                    <div>
+                        <span class="quality-score">{{ quality_report.score or 0 }}</span>
+                        <strong>{{ quality_report.status or "warning" }}</strong>
+                    </div>
+                    <div class="quality-metrics">
+                        <span>Слайдов: {{ metrics.slides_total or slide_plan|length }}</span>
+                        <span>Макеты: {{ metrics.layouts_used|join(", ") if metrics.layouts_used else "нет" }}</span>
+                        <span>Данные: {{ metrics.slides_with_data or 0 }}</span>
+                        <span>CSS fallback: {{ metrics.css_fallback_count or 0 }}</span>
+                    </div>
+                </div>
 
-            <h2>PNG-элементы</h2>
-            <div class="summary">
-                <p><strong>Сгенерировано PNG:</strong> {{ generated_png_assets_count }}</p>
-                {% if png_assets_warning %}
-                    <p><strong>Предупреждение:</strong> {{ png_assets_warning }}</p>
+                {% if quality_report.errors %}
+                    <h3>Ошибки</h3>
+                    <ul class="clean-list">
+                        {% for error in quality_report.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
                 {% endif %}
-                {% if generated_png_assets %}
-                    {% for image in generated_png_assets %}
-                        <p>
-                            <strong>Слайд {{ image.slide_number }}:</strong>
-                            type: {{ image.asset_type or "n/a" }} ·
-                            placement: {{ image.placement or "n/a" }} ·
-                            category: {{ image.category or "n/a" }} ·
-                            status: {{ image.status }}
-                            {% if image.image_path %} · {{ image.image_path }}{% endif %}
-                            {% if image.error %} · {{ image.error }}{% endif %}
-                        </p>
-                    {% endfor %}
-                {% else %}
-                    <p>PNG-элементы не создавались. Презентация продолжает работать без них.</p>
-                {% endif %}
-            </div>
 
-            <h2>Декоративные слои</h2>
-            <div class="slides-list">
-                {% for slide in deck_plan.slides %}
-                    {% set decor = slide.decorative_layer or {} %}
-                    <article class="slide-item">
-                        <div class="slide-head">
-                            <strong>{{ slide.number }}. {{ slide.title }}</strong>
-                            <span>{{ decor.category or "general" }}</span>
-                        </div>
-                        <p class="slide-flags">
-                            asset_id: {{ decor.asset_id or "нет" }} ·
-                            enabled: {{ decor.enabled }} ·
-                            placement: {{ decor.placement or "none" }}
-                        </p>
-                    </article>
-                {% endfor %}
-            </div>
-
-            <h2>Quality score</h2>
-            <div class="summary">
-                <p><strong>Оценка:</strong> {{ quality_report.score }} / 100</p>
-                {% for key, value in quality_report.metrics.items() %}
-                    <p><strong>{{ key }}:</strong> {{ value }}</p>
-                {% endfor %}
-                {% if quality_report.warnings %}
+                {% if quality_report.warnings or slide_plan_quality_warnings or hero_visual_warnings %}
                     <h3>Предупреждения</h3>
-                    {% for warning in quality_report.warnings %}
-                        <p>{{ warning }}</p>
-                    {% endfor %}
+                    <ul class="clean-list">
+                        {% for warning in quality_report.warnings or [] %}
+                            <li>{{ warning }}</li>
+                        {% endfor %}
+                        {% for warning in slide_plan_quality_warnings or [] %}
+                            <li>{{ warning }}</li>
+                        {% endfor %}
+                        {% for warning in hero_visual_warnings or [] %}
+                            <li>{{ warning }}</li>
+                        {% endfor %}
+                    </ul>
                 {% endif %}
-            </div>
+            </section>
 
-            <h2>Предпросмотр текста</h2>
-            <div class="text-preview">
-                {% if extraction.text %}
-                    <pre>{{ extraction.text[:5000] }}</pre>
-                {% else %}
-                    <p>Текст не найден.</p>
-                {% endif %}
-            </div>
-            {% if extraction.characters > 5000 %}
-                <p class="note">Показаны первые 5000 символов.</p>
-            {% endif %}
+            <section class="preview-section">
+                <h2>Диагностика документа</h2>
+                <div class="preview-grid two-cols">
+                    <div class="info-card">
+                        <strong>Контекст</strong>
+                        <p><b>Тема:</b> {{ document_context.topic or topic }}</p>
+                        <p><b>Тип документа:</b> {{ document_context.document_type or "не определен" }}</p>
+                        {% set detected_context = deck_plan.detected_context or {} %}
+                        <p><b>Домен:</b> {{ document_context.domain or detected_context.domain or "general" }}</p>
+                        <p><b>Организация:</b> {{ document_context.organization or "не найдена" }}</p>
+                        <p><b>Назначение:</b> {{ document_context.purpose or "не выделено" }}</p>
+                    </div>
+                    <div class="info-card">
+                        <strong>Смысл</strong>
+                        <p><b>Проблема:</b> {{ document_context.main_problem or "не выделена" }}</p>
+                        <p><b>Решение:</b> {{ document_context.main_solution or "не выделено" }}</p>
+                        <p><b>Результат:</b> {{ document_context.main_result or "не выделен" }}</p>
+                        <p><b>Визуальные запреты:</b> {{ document_context.forbidden_visuals|join(", ") if document_context.forbidden_visuals else "нет" }}</p>
+                    </div>
+                </div>
+            </section>
 
-            <h2>Черновой JSON</h2>
-            <div class="json-preview">
-                <pre>{{ deck_plan_json }}</pre>
-            </div>
+            <section class="preview-section">
+                <h2>Проверенные факты</h2>
+                {% set fact_numbers = verified_facts.numbers if verified_facts.numbers else [] %}
+                {% set fact_dates = verified_facts.dates if verified_facts.dates else [] %}
+                {% set fact_orgs = verified_facts.organizations if verified_facts.organizations else [] %}
+                <div class="preview-grid three-cols">
+                    <div class="info-card">
+                        <strong>Числа</strong>
+                        {% for item in fact_numbers[:8] %}
+                            <p>{{ item }}</p>
+                        {% else %}
+                            <p>Числа не найдены.</p>
+                        {% endfor %}
+                    </div>
+                    <div class="info-card">
+                        <strong>Даты</strong>
+                        {% for item in fact_dates[:8] %}
+                            <p>{{ item }}</p>
+                        {% else %}
+                            <p>Даты не найдены.</p>
+                        {% endfor %}
+                    </div>
+                    <div class="info-card">
+                        <strong>Организации</strong>
+                        {% for item in fact_orgs[:8] %}
+                            <p>{{ item }}</p>
+                        {% else %}
+                            <p>Организации не найдены.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
 
-            <div class="actions-row">
-                <a class="button-link" href="/deck/{{ project_id }}">Открыть HTML-презентацию</a>
-                <a class="button-link secondary-button" href="/">Загрузить другой файл</a>
+            <section class="preview-section">
+                <h2>План слайдов</h2>
+                <div class="preview-table-wrap">
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Роль</th>
+                                <th>Макет</th>
+                                <th>Заголовок</th>
+                                <th>Данные</th>
+                                <th>Визуал</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slide in slide_plan %}
+                                {% set asset = slide.visual_asset or {} %}
+                                <tr>
+                                    <td>{{ slide.slide_no }}</td>
+                                    <td>{{ slide.role }}</td>
+                                    <td>{{ slide.layout_type }}</td>
+                                    <td>{{ slide.title }}</td>
+                                    <td>{{ slide.data_blocks|length }}</td>
+                                    <td>{{ asset.id or "css_fallback" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="preview-section">
+                <h2>Черновой JSON</h2>
+                <pre class="json-preview">{{ deck_plan_json }}</pre>
+            </section>
+
+            <div class="preview-actions">
+                <a class="button" href="/deck/{{ project_id }}">Открыть HTML-презентацию</a>
+                <a class="button button-secondary" href="/deck/{{ project_id }}?debug=1">Открыть debug-режим</a>
             </div>
         </section>
     </main>

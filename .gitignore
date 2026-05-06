@@ -6,6 +6,9 @@ __pycache__/
 uploads/*
 outputs/*
 static/generated/*
+Icon/
+static/decor/icons/*
+static/decor/icons_clean/*
 !uploads/.gitkeep
 !outputs/.gitkeep
 !static/generated/.gitkeep
