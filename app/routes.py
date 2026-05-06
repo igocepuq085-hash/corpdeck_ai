@@ -2,7 +2,7 @@ import json
 from uuid import uuid4
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from app.ai_service import analyze_document_context_with_ai, build_slide_plan_with_ai
@@ -161,6 +161,33 @@ async def deck(request: Request, project_id: str):
             "deck_plan": deck_plan,
             "brand_config": get_default_brand_config(),
             "debug": request.query_params.get("debug") == "1",
+        },
+    )
+
+
+@router.get("/download-html/{project_id}")
+async def download_html(request: Request, project_id: str):
+    try:
+        deck_plan = load_deck_plan(project_id)
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+    deck_plan = prepare_mvp_deck_plan(deck_plan)
+    html = templates.env.get_template("deck.html").render(
+        {
+            "request": request,
+            "app_name": APP_NAME,
+            "project_id": project_id,
+            "deck_plan": deck_plan,
+            "brand_config": get_default_brand_config(),
+            "debug": False,
+        }
+    )
+    return Response(
+        content=html,
+        media_type="text/html; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="presentation_{project_id}.html"'
         },
     )
 

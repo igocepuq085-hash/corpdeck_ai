@@ -9590,6 +9590,61 @@ body.debug-render .slide-header-row {
     line-height: 1.24 !important;
 }
 
+.preview-actions {
+    justify-content: center !important;
+    gap: 14px !important;
+    margin-top: 28px;
+}
+
+.preview-actions .button,
+.preview-actions .button-secondary {
+    min-width: 230px;
+    text-align: center;
+}
+
+.deck-toolbar__actions {
+    justify-content: center;
+    gap: 10px;
+}
+
+.deck-toolbar--clean {
+    justify-content: center !important;
+    position: sticky;
+}
+
+.deck-toolbar--clean .deck-toolbar__brand {
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.deck-toolbar--clean .deck-toolbar__actions {
+    margin: 0 auto;
+}
+
+.deck-toolbar--clean .toolbar-button {
+    min-height: 42px;
+    padding: 10px 14px;
+    white-space: nowrap;
+}
+
+.mvp-deck-wrapper:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    padding: 0;
+    background: #eef7ff;
+}
+
+.mvp-deck-wrapper:fullscreen .slide-viewport {
+    margin: 0 auto;
+}
+
+.mvp-deck-wrapper:fullscreen .slide-viewport:first-child {
+    margin-top: 0;
+}
+
 @page {
     size: 16in 9in;
     margin: 0;

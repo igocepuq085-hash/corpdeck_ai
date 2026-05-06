@@ -84,7 +84,37 @@
     document.head.appendChild(script);
   }
 
+  function updateFullscreenButtons() {
+    var label = document.fullscreenElement ? "Выйти из полного экрана" : "Полный экран";
+    document.querySelectorAll("[data-fullscreen-toggle]").forEach(function (button) {
+      button.textContent = label;
+    });
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      var target = document.querySelector(".mvp-deck-wrapper") || document.documentElement;
+      if (target.requestFullscreen) {
+        target.requestFullscreen().then(updateFullscreenButtons).catch(function () {});
+      }
+      return;
+    }
+
+    if (document.exitFullscreen) {
+      document.exitFullscreen().then(updateFullscreenButtons).catch(function () {});
+    }
+  }
+
+  function bindFullscreenControls() {
+    document.querySelectorAll("[data-fullscreen-toggle]").forEach(function (button) {
+      button.addEventListener("click", toggleFullscreen);
+    });
+    document.addEventListener("fullscreenchange", updateFullscreenButtons);
+    updateFullscreenButtons();
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     loadLocalChartJs();
+    bindFullscreenControls();
   });
 })();
